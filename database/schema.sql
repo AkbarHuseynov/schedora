@@ -101,7 +101,13 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
 -- ─────────────────────────────────────────
 -- DEFAULT ADMIN SEED
 -- ─────────────────────────────────────────
--- Password: Admin@1234  (bcrypt hash pre-generated)
+-- Password: Admin@1234
 INSERT IGNORE INTO users (name, email, password, role) VALUES
 ('Admin', 'admin@schedora.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWq', 'admin');
--- Password: Admin@1234
+
+-- Force-update the hash in case an old/broken hash was already inserted
+UPDATE users
+SET password = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWq',
+    role     = 'admin',
+    is_active = 1
+WHERE email = 'admin@schedora.com';
