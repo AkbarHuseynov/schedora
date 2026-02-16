@@ -1,0 +1,118 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="page-header">
+        <h2>Shops</h2>
+        <p class="text-muted mb-0">Manage all registered shops on the platform.</p>
+    </div>
+
+    <!-- Search -->
+    <form action="/admin/shops" method="GET" class="row g-3 mb-4">
+        <div class="col-md-6">
+            <input type="text" name="search" class="form-control" placeholder="Search by shop or owner name..." value="<%= search %>">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn-gold w-100 py-2">Search</button>
+        </div>
+    </form>
+
+    <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Shop</th>
+                    <th>Category</th>
+                    <th>Owner</th>
+                    <th>Services</th>
+                    <th>Bookings</th>
+                    <th>Wallet</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (shops.length === 0) { %>
+                    <tr><td colspan="9" class="text-center text-muted py-4">No shops found.</td></tr>
+                <% } %>
+                <% shops.forEach(function(s) { %>
+                    <tr>
+                        <td class="text-muted">#<%= s.id %></td>
+                        <td class="fw-semibold"><%= s.name %></td>
+                        <td><span class="shop-badge"><%= s.category %></span></td>
+                        <td class="text-muted small"><%= s.owner_name %></td>
+                        <td class="text-center"><%= s.service_count %></td>
+                        <td class="text-center"><%= s.booking_count %></td>
+                        <td class="text-gold fw-semibold">$<%= parseFloat(s.wallet_balance).toFixed(2) %></td>
+                        <td>
+                            <% if (s.is_active) { %>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                            <% } else { %>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactive</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <form action="/admin/shops/<%= s.id %>/toggle" method="POST" class="d-inline">
+                                <button class="btn btn-sm <%= s.is_active ? 'btn-outline-warning' : 'btn-outline-success' %> me-1">
+                                    <%= s.is_active ? 'Suspend' : 'Activate' %>
+                                </button>
+                            </form>
+
+                            <!-- Wallet adjust modal trigger -->
+                            <button class="btn btn-sm btn-outline-secondary me-1"
+                                    data-bs-toggle="modal" data-bs-target="#walletModal<%= s.id %>">
+                                Wallet
+                            </button>
+
+                            <form action="/admin/shops/<%= s.id %>/delete" method="POST" class="d-inline">
+                                <button class="btn btn-sm btn-outline-danger"
+                                        data-confirm="Permanently delete this shop and all its data?">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Wallet modals -->
+<% shops.forEach(function(s) { %>
+    <div class="modal fade" id="walletModal<%= s.id %>" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold">Adjust Wallet – <%= s.name %></h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/admin/shops/<%= s.id %>/wallet" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-select">
+                                <option value="credit">Credit (add funds)</option>
+                                <option value="debit">Debit (remove funds)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount ($)</label>
+                            <input type="number" name="amount" class="form-control" min="0.01" step="0.01" required placeholder="0.00">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Note</label>
+                            <input type="text" name="note" class="form-control" placeholder="Reason...">
+                        </div>
+                        <button type="submit" class="btn-gold w-100 py-2">Apply</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<% }); %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,126 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h2>Admin Dashboard</h2>
+            <p class="text-muted mb-0">Platform overview and management.</p>
+        </div>
+        <span class="badge bg-dark text-gold px-3 py-2 rounded-pill"><i class="bi bi-shield-check me-1"></i>Admin</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <a href="/admin/users?role=client" class="d-block text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+                    <div>
+                        <div class="fw-bold fs-4"><%= counts.clients %></div>
+                        <div class="text-muted small">Clients</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/users?role=owner" class="d-block text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="bi bi-shop"></i></div>
+                    <div>
+                        <div class="fw-bold fs-4"><%= counts.owners %></div>
+                        <div class="text-muted small">Shop Owners</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/shops" class="d-block text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon gold"><i class="bi bi-building"></i></div>
+                    <div>
+                        <div class="fw-bold fs-4"><%= counts.shops %></div>
+                        <div class="text-muted small">Active Shops</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/bookings?status=pending" class="d-block text-decoration-none">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="bi bi-calendar-event"></i></div>
+                    <div>
+                        <div class="fw-bold fs-4"><%= counts.pending_bookings %></div>
+                        <div class="text-muted small">Pending Bookings</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick nav -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <a href="/admin/users" class="d-block card-schedora p-3 text-center">
+                <i class="bi bi-people-fill fs-2 text-gold mb-2 d-block"></i>
+                <span class="fw-semibold small">All Users</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/shops" class="d-block card-schedora p-3 text-center">
+                <i class="bi bi-building-fill fs-2 text-gold mb-2 d-block"></i>
+                <span class="fw-semibold small">All Shops</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/bookings" class="d-block card-schedora p-3 text-center">
+                <i class="bi bi-calendar-week-fill fs-2 text-gold mb-2 d-block"></i>
+                <span class="fw-semibold small">All Bookings</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/admin/bookings?status=pending" class="d-block card-schedora p-3 text-center">
+                <i class="bi bi-hourglass-split fs-2 text-gold mb-2 d-block"></i>
+                <span class="fw-semibold small">Pending Review</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent bookings -->
+    <h5 class="fw-bold mb-3">Recent Platform Bookings</h5>
+    <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client</th>
+                    <th>Shop</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (recentBookings.length === 0) { %>
+                    <tr><td colspan="7" class="text-center text-muted py-4">No bookings yet.</td></tr>
+                <% } %>
+                <% recentBookings.forEach(function(b) { %>
+                    <tr>
+                        <td class="text-muted">#<%= b.id %></td>
+                        <td class="fw-semibold"><%= b.client_name %></td>
+                        <td><%= b.shop_name %></td>
+                        <td><%= b.service_name %></td>
+                        <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                        <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                        <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

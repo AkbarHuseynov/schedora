@@ -1,0 +1,68 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="page-header">
+        <h2>All Bookings</h2>
+        <p class="text-muted mb-0">Platform-wide booking overview.</p>
+    </div>
+
+    <!-- Filters -->
+    <form action="/admin/bookings" method="GET" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control" placeholder="Search client or shop name..." value="<%= search %>">
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="all"       <%= statusFilter === 'all'       ? 'selected' : '' %>>All Statuses</option>
+                <option value="pending"   <%= statusFilter === 'pending'   ? 'selected' : '' %>>Pending</option>
+                <option value="confirmed" <%= statusFilter === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+                <option value="completed" <%= statusFilter === 'completed' ? 'selected' : '' %>>Completed</option>
+                <option value="cancelled" <%= statusFilter === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn-gold w-100 py-2">Filter</button>
+        </div>
+    </form>
+
+    <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Client</th>
+                    <th>Shop</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Booked On</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (bookings.length === 0) { %>
+                    <tr><td colspan="9" class="text-center text-muted py-4">No bookings found.</td></tr>
+                <% } %>
+                <% bookings.forEach(function(b) { %>
+                    <tr>
+                        <td class="text-muted">#<%= b.id %></td>
+                        <td class="fw-semibold"><%= b.client_name %></td>
+                        <td><%= b.shop_name %></td>
+                        <td class="text-muted small"><%= b.service_name %></td>
+                        <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                        <td><%= b.booking_time.substring(0,5) %></td>
+                        <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                        <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                        <td class="text-muted small"><%= new Date(b.created_at).toLocaleDateString('en-GB') %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

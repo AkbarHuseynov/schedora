@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <!-- Page header + search -->
+    <div class="page-header">
+        <h2>Browse Shops & Services</h2>
+        <p class="text-muted">Discover top-rated barbers, salons, spas and laser centers near you.</p>
+    </div>
+
+    <!-- Filter bar -->
+    <form action="/client/shops" method="GET" class="row g-3 mb-5">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="search" class="form-control" placeholder="Search shops..." value="<%= search %>">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select name="category" class="form-select">
+                <option value="all"    <%= category === 'all'    ? 'selected' : '' %>>All Categories</option>
+                <option value="barber" <%= category === 'barber' ? 'selected' : '' %>>Barber</option>
+                <option value="beauty" <%= category === 'beauty' ? 'selected' : '' %>>Beauty Salon</option>
+                <option value="spa"    <%= category === 'spa'    ? 'selected' : '' %>>Spa</option>
+                <option value="laser"  <%= category === 'laser'  ? 'selected' : '' %>>Laser</option>
+                <option value="other"  <%= category === 'other'  ? 'selected' : '' %>>Other</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn-gold w-100 py-2">Search</button>
+        </div>
+    </form>
+
+    <!-- Results -->
+    <% if (shops.length === 0) { %>
+        <div class="text-center py-5">
+            <i class="bi bi-shop-window display-4 text-muted mb-3 d-block"></i>
+            <h5 class="text-muted">No shops found</h5>
+            <p class="text-muted small">Try a different category or search term.</p>
+        </div>
+    <% } else { %>
+        <div class="row g-4">
+            <% shops.forEach(function(shop) { %>
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card-schedora h-100">
+                        <!-- Cover image -->
+                        <% if (shop.cover_image) { %>
+                            <img src="/uploads/<%= shop.cover_image %>" class="card-img-top" alt="<%= shop.name %>">
+                        <% } else { %>
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-dark" style="height:200px;">
+                                <i class="bi bi-shop text-gold" style="font-size:3rem;"></i>
+                            </div>
+                        <% } %>
+
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold mb-0"><%= shop.name %></h5>
+                                <span class="shop-badge"><%= shop.category %></span>
+                            </div>
+                            <% if (shop.description) { %>
+                                <p class="text-muted small mb-3"><%= shop.description.substring(0, 80) %><%= shop.description.length > 80 ? '...' : '' %></p>
+                            <% } %>
+
+                            <div class="d-flex gap-3 text-muted small mb-3">
+                                <% if (shop.address) { %><span><i class="bi bi-geo-alt me-1"></i><%= shop.address.substring(0,25) %>...</span><% } %>
+                                <span><i class="bi bi-grid me-1"></i><%= shop.service_count %> services</span>
+                            </div>
+
+                            <a href="/client/shops/<%= shop.id %>" class="btn-gold w-100 py-2 text-center d-block">
+                                View Shop
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

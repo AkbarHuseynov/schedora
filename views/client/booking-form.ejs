@@ -1,0 +1,103 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="booking-card">
+                <div class="row g-0">
+                    <!-- Summary sidebar -->
+                    <div class="col-md-4">
+                        <div class="booking-summary h-100">
+                            <div class="mb-4">
+                                <!-- Service photo -->
+                                <% if (photos && photos.length > 0) { %>
+                                    <div id="bookCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                                        <div class="carousel-inner">
+                                            <% photos.forEach(function(p, i) { %>
+                                                <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                                                    <img src="/uploads/<%= p.filename %>" class="d-block w-100 rounded-3"
+                                                         style="height:160px;object-fit:cover;" alt="">
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                        <% if (photos.length > 1) { %>
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#bookCarousel" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon"></span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#bookCarousel" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon"></span>
+                                            </button>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+
+                                <p class="text-white opacity-65 small mb-1">Service</p>
+                                <h5 class="text-white fw-bold"><%= service.name %></h5>
+                                <p class="text-white opacity-65 small mb-1 mt-3">Shop</p>
+                                <p class="text-white mb-0"><%= service.shop_name %></p>
+                            </div>
+
+                            <hr style="border-color:rgba(255,255,255,0.15);">
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-white opacity-75">Price</span>
+                                <span class="price-tag fw-bold">$<%= parseFloat(service.price).toFixed(2) %></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="text-white opacity-75">Duration</span>
+                                <span class="text-white"><%= service.duration_min %> min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking form -->
+                    <div class="col-md-8">
+                        <div class="p-4 p-md-5">
+                            <h4 class="fw-bold mb-1">Complete Your Booking</h4>
+                            <p class="text-muted small mb-4">Select your preferred date and time</p>
+
+                            <form action="/client/book/<%= service.id %>" method="POST">
+                                <div class="mb-4">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" name="booking_date" id="booking_date"
+                                           class="form-control form-control-lg" required>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Time</label>
+                                    <select name="booking_time" class="form-select form-select-lg" required>
+                                        <option value="">-- Select time slot --</option>
+                                        <% var times = ['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00']; %>
+                                        <% times.forEach(function(t) { %>
+                                            <option value="<%= t %>"><%= t %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                                    <textarea name="notes" class="form-control" rows="3"
+                                              placeholder="Any special requests or notes for the shop..."></textarea>
+                                </div>
+
+                                <div class="d-flex gap-3">
+                                    <a href="/client/shops/<%= service.shop_id %>" class="btn-outline-gold flex-fill py-3 text-center">
+                                        <i class="bi bi-arrow-left me-1"></i> Back
+                                    </a>
+                                    <button type="submit" class="btn-gold flex-fill py-3 fw-semibold">
+                                        <i class="bi bi-calendar-check me-1"></i> Confirm Booking
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

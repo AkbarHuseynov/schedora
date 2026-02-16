@@ -1,0 +1,91 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="page-header">
+        <h2>Users</h2>
+        <p class="text-muted mb-0">Manage all registered users on the platform.</p>
+    </div>
+
+    <!-- Filter -->
+    <form action="/admin/users" method="GET" class="row g-3 mb-4">
+        <div class="col-md-5">
+            <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="<%= search %>">
+        </div>
+        <div class="col-md-3">
+            <select name="role" class="form-select">
+                <option value="all"    <%= roleFilter === 'all'    ? 'selected' : '' %>>All Roles</option>
+                <option value="client" <%= roleFilter === 'client' ? 'selected' : '' %>>Clients</option>
+                <option value="owner"  <%= roleFilter === 'owner'  ? 'selected' : '' %>>Owners</option>
+                <option value="admin"  <%= roleFilter === 'admin'  ? 'selected' : '' %>>Admins</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn-gold w-100 py-2">Filter</button>
+        </div>
+    </form>
+
+    <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (users.length === 0) { %>
+                    <tr><td colspan="8" class="text-center text-muted py-4">No users found.</td></tr>
+                <% } %>
+                <% users.forEach(function(u) { %>
+                    <tr>
+                        <td class="text-muted">#<%= u.id %></td>
+                        <td class="fw-semibold"><%= u.name %></td>
+                        <td class="text-muted small"><%= u.email %></td>
+                        <td class="text-muted small"><%= u.phone || '—' %></td>
+                        <td>
+                            <% if (u.role === 'admin')  { %><span class="badge bg-dark">Admin</span><% } %>
+                            <% if (u.role === 'owner')  { %><span class="badge bg-warning text-dark">Owner</span><% } %>
+                            <% if (u.role === 'client') { %><span class="badge bg-info text-dark">Client</span><% } %>
+                        </td>
+                        <td>
+                            <% if (u.is_active) { %>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                            <% } else { %>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Suspended</span>
+                            <% } %>
+                        </td>
+                        <td class="text-muted small"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
+                        <td>
+                            <% if (u.id !== user.id) { %>
+                                <form action="/admin/users/<%= u.id %>/toggle" method="POST" class="d-inline">
+                                    <button class="btn btn-sm <%= u.is_active ? 'btn-outline-warning' : 'btn-outline-success' %> me-1">
+                                        <%= u.is_active ? 'Suspend' : 'Activate' %>
+                                    </button>
+                                </form>
+                                <form action="/admin/users/<%= u.id %>/delete" method="POST" class="d-inline">
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            data-confirm="Permanently delete this user? This cannot be undone.">
+                                        Delete
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <span class="text-muted small">(you)</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

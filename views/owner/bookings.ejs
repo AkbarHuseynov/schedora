@@ -1,0 +1,87 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h2>Manage Bookings</h2>
+            <p class="text-muted mb-0">View and update booking statuses for <strong><%= shop.name %></strong>.</p>
+        </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <% ['all','pending','confirmed','completed','cancelled'].forEach(function(s) { %>
+            <a href="/owner/bookings<%= s !== 'all' ? '?status=' + s : '' %>"
+               class="btn btn-sm <%= statusFilter === s ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3">
+                <%= s.charAt(0).toUpperCase() + s.slice(1) %>
+            </a>
+        <% }); %>
+    </div>
+
+    <% if (bookings.length === 0) { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
+            <p class="text-muted">No bookings found for this filter.</p>
+        </div>
+    <% } else { %>
+        <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Client</th>
+                        <th>Phone</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bookings.forEach(function(b) { %>
+                        <tr>
+                            <td class="text-muted">#<%= b.id %></td>
+                            <td class="fw-semibold"><%= b.client_name %></td>
+                            <td class="text-muted small"><%= b.client_phone || '—' %></td>
+                            <td><%= b.service_name %></td>
+                            <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                            <td><%= b.booking_time.substring(0,5) %></td>
+                            <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                            <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                            <td>
+                                <% if (b.status === 'pending') { %>
+                                    <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
+                                        <input type="hidden" name="status" value="confirmed">
+                                        <button class="btn btn-sm btn-outline-primary me-1">Confirm</button>
+                                    </form>
+                                    <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
+                                        <input type="hidden" name="status" value="cancelled">
+                                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                <% } else if (b.status === 'confirmed') { %>
+                                    <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
+                                        <input type="hidden" name="status" value="completed">
+                                        <button class="btn btn-sm btn-outline-success me-1">Complete</button>
+                                    </form>
+                                    <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
+                                        <input type="hidden" name="status" value="cancelled">
+                                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="text-muted small">—</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>

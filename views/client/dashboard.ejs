@@ -1,0 +1,103 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+
+<div class="container py-5">
+    <%- include('../partials/flash') %>
+
+    <!-- Page header -->
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h2>Welcome back, <%= user.name.split(' ')[0] %> 👋</h2>
+            <p class="text-muted mb-0">Manage your bookings and discover new services.</p>
+        </div>
+        <a href="/client/shops" class="btn-gold px-4 py-2 d-none d-md-inline-flex align-items-center gap-2">
+            <i class="bi bi-search"></i> Browse Services
+        </a>
+    </div>
+
+    <!-- Quick action cards -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <a href="/client/shops" class="d-block">
+                <div class="stat-card flex-column text-center py-4 h-100">
+                    <div class="stat-icon gold mx-auto mb-2"><i class="bi bi-shop"></i></div>
+                    <div class="fw-semibold small">Browse Shops</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/client/bookings" class="d-block">
+                <div class="stat-card flex-column text-center py-4 h-100">
+                    <div class="stat-icon blue mx-auto mb-2"><i class="bi bi-calendar2-check"></i></div>
+                    <div class="fw-semibold small">My Bookings</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/client/shops?category=barber" class="d-block">
+                <div class="stat-card flex-column text-center py-4 h-100">
+                    <div class="stat-icon purple mx-auto mb-2"><i class="bi bi-scissors"></i></div>
+                    <div class="fw-semibold small">Barbers</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/client/shops?category=spa" class="d-block">
+                <div class="stat-card flex-column text-center py-4 h-100">
+                    <div class="stat-icon green mx-auto mb-2"><i class="bi bi-flower1"></i></div>
+                    <div class="fw-semibold small">Spa & Laser</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Upcoming bookings -->
+    <h4 class="fw-bold mb-4">Upcoming Appointments</h4>
+    <% if (upcoming.length === 0) { %>
+        <div class="text-center py-5 bg-white rounded-4 border">
+            <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
+            <h5 class="text-muted">No upcoming appointments</h5>
+            <p class="text-muted small">Browse services and make your first booking today.</p>
+            <a href="/client/shops" class="btn-gold px-4 py-2 mt-2 d-inline-flex align-items-center gap-2">
+                <i class="bi bi-search"></i> Browse Now
+            </a>
+        </div>
+    <% } else { %>
+        <div class="row g-3">
+            <% upcoming.forEach(function(b) { %>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card-schedora p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1"><%= b.service_name %></h6>
+                                <p class="text-muted small mb-0"><i class="bi bi-shop me-1"></i><%= b.shop_name %></p>
+                            </div>
+                            <span class="status-badge badge-<%= b.status %>"><%= b.status %></span>
+                        </div>
+                        <div class="d-flex gap-3 text-muted small">
+                            <span><i class="bi bi-calendar3 me-1"></i><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></span>
+                            <span><i class="bi bi-clock me-1"></i><%= b.booking_time.substring(0,5) %></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                            <span class="fw-bold text-gold">$<%= parseFloat(b.total_price).toFixed(2) %></span>
+                            <% if (['pending','confirmed'].includes(b.status)) { %>
+                                <form action="/client/bookings/<%= b.id %>/cancel" method="POST" class="mb-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Cancel this booking?">
+                                        Cancel
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/client/bookings" class="btn-outline-gold px-4 py-2 d-inline-flex align-items-center gap-2">
+                View All Bookings <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>
