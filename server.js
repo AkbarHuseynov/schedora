@@ -4,6 +4,7 @@ const session        = require('express-session');
 const flash          = require('connect-flash');
 const methodOverride = require('method-override');
 const path           = require('path');
+const { initDB }     = require('./config/db');
 
 const authRoutes   = require('./routes/authRoutes');
 const clientRoutes = require('./routes/clientRoutes');
@@ -76,6 +77,12 @@ app.use((err, req, res, next) => {
 
 // ── Start server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`\n  ✦ SCHEDORA running at http://localhost:${PORT}\n`);
-});
+
+async function startServer() {
+    await initDB();   // create DB + tables if they don't exist
+    app.listen(PORT, () => {
+        console.log(`\n  \u2726 SCHEDORA running at http://localhost:${PORT}\n`);
+    });
+}
+
+startServer();

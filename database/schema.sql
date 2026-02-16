@@ -103,5 +103,5 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
 -- ─────────────────────────────────────────
 -- Password: Admin@1234  (bcrypt hash pre-generated)
 INSERT IGNORE INTO users (name, email, password, role) VALUES
-('Admin', 'admin@schedora.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
--- NOTE: replace the hash above after running: node -e "const b=require('bcryptjs');console.log(b.hashSync('Admin@1234',10))"
+('Admin', 'admin@schedora.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWq', 'admin');
+-- Password: Admin@1234
