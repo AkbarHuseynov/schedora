@@ -103,11 +103,11 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
 -- ─────────────────────────────────────────
 -- Password: Admin@1234
 INSERT IGNORE INTO users (name, email, password, role) VALUES
-('Admin', 'admin@schedora.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWq', 'admin');
+('Admin', 'admin@schedora.com', '$2a$10$A3Jy7Z8a1EeCmSbvqJ6ee.4wmZ6VtEWg94eqWqyhJXXdbcWIiD0bm', 'admin');
 
 -- Force-update the hash in case an old/broken hash was already inserted
 UPDATE users
-SET password = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWq',
+SET password = '$2a$10$A3Jy7Z8a1EeCmSbvqJ6ee.4wmZ6VtEWg94eqWqyhJXXdbcWIiD0bm',
     role     = 'admin',
     is_active = 1
 WHERE email = 'admin@schedora.com';
