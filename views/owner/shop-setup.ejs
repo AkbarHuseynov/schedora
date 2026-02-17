@@ -69,25 +69,29 @@
                         <h5 class="fw-bold mb-3">Location & Map Settings</h5>
                         <p class="text-muted small mb-4">Control how your shop appears on the map and visibility to clients.</p>
 
-                        <!-- Location coordinates -->
+                        <!-- Location coordinates (hidden, updated via map picker) -->
+                        <input type="hidden" name="latitude" id="latitude-input" value="<%= shop && shop.latitude ? shop.latitude : '' %>">
+                        <input type="hidden" name="longitude" id="longitude-input" value="<%= shop && shop.longitude ? shop.longitude : '' %>">
+
+                        <!-- Location selection via map -->
                         <div class="mb-4">
-                            <label class="form-label">Shop Location Coordinates</label>
-                            <p class="text-muted small mb-3">Click the map button to select your location, or enter coordinates manually</p>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small">Latitude</label>
-                                    <input type="number" name="latitude" id="latitude-input" class="form-control" step="0.00000001"
-                                           value="<%= shop && shop.latitude ? shop.latitude : '' %>" placeholder="e.g. 40.7128">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small">Longitude</label>
-                                    <input type="number" name="longitude" id="longitude-input" class="form-control" step="0.00000001"
-                                           value="<%= shop && shop.longitude ? shop.longitude : '' %>" placeholder="e.g. -74.0060">
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-3" id="open-map-picker-btn">
+                            <label class="form-label">Shop Location</label>
+                            <p class="text-muted small mb-3">Click the button below to select your shop location on the map</p>
+                            <button type="button" class="btn btn-lg btn-outline-secondary w-100 py-3" id="open-map-picker-btn">
                                 <i class="bi bi-map me-2"></i>Select Location on Map
                             </button>
+                            <!-- Show selected coordinates if set -->
+                            <% if (shop && shop.latitude && shop.longitude) { %>
+                                <div class="alert alert-success mt-3 mb-0">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <strong>Location selected:</strong> <%= shop.latitude.toFixed(6) %>, <%= shop.longitude.toFixed(6) %>
+                                </div>
+                            <% } else { %>
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>No location selected yet.</strong> Click the button above to choose your shop's location.
+                                </div>
+                            <% } %>
                         </div>
 
                         <!-- Location determination mode -->
