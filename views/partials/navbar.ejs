@@ -18,52 +18,61 @@
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-1">
                 <% if (!user) { %>
-                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/auth/login">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/" data-i18n="nav_home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/auth/login" data-i18n="nav_login">Login</a></li>
                     <li class="nav-item">
-                        <a class="btn btn-gold ms-2" href="/auth/register">Get Started</a>
+                        <a class="btn btn-gold ms-2" href="/auth/register" data-i18n="nav_get_started">Get Started</a>
                     </li>
                 <% } else if (user.role === 'client') { %>
-                    <li class="nav-item"><a class="nav-link" href="/client/dashboard">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/client/shops">Browse</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/client/bookings">My Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/client/dashboard" data-i18n="nav_dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/client/shops" data-i18n="nav_browse">Browse</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/client/bookings" data-i18n="nav_my_bookings">My Bookings</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle me-1"></i><%= user.name %>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i><span data-i18n="nav_logout">Logout</span></a></li>
                         </ul>
                     </li>
                 <% } else if (user.role === 'owner') { %>
-                    <li class="nav-item"><a class="nav-link" href="/owner/dashboard">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/owner/services">Services</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/owner/bookings">Bookings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/owner/wallet">Wallet</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/owner/dashboard" data-i18n="nav_dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/owner/services" data-i18n="nav_services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/owner/bookings" data-i18n="nav_bookings">Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/owner/wallet" data-i18n="nav_wallet">Wallet</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-shop me-1"></i><%= user.name %>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/owner/shop/setup"><i class="bi bi-gear me-2"></i>Shop Settings</a></li>
+                            <li><a class="dropdown-item" href="/owner/shop/setup"><i class="bi bi-gear me-2"></i><span data-i18n="nav_shop_settings">Shop Settings</span></a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i><span data-i18n="nav_logout">Logout</span></a></li>
                         </ul>
                     </li>
                 <% } else if (user.role === 'admin') { %>
-                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin/users">Users</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin/shops">Shops</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin/bookings">Bookings</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/dashboard" data-i18n="nav_dashboard">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/users" data-i18n="nav_users">Users</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/shops" data-i18n="nav_shops">Shops</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/bookings" data-i18n="nav_bookings">Bookings</a></li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-shield-check me-1"></i><%= user.name %>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i><span data-i18n="nav_logout">Logout</span></a></li>
                         </ul>
                     </li>
                 <% } %>
+
+                <!-- Language Selector -->
+                <li class="nav-item ms-lg-2">
+                    <div class="lang-selector d-flex align-items-center gap-1">
+                        <button class="lang-btn" data-lang="en" title="English">EN</button>
+                        <button class="lang-btn" data-lang="ru" title="Русский">RU</button>
+                        <button class="lang-btn" data-lang="az" title="Azərbaycanca">AZ</button>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>

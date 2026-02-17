@@ -31,10 +31,12 @@ exports.getShops = async (req, res) => {
     try {
         let query = `
             SELECT sh.*, u.name AS owner_name,
-                   COUNT(DISTINCT s.id) AS service_count
+                   COUNT(DISTINCT s.id) AS service_count,
+                   COALESCE(ss.map_visible, 1) AS map_visible
             FROM shops sh
             JOIN users u ON sh.owner_id = u.id
             LEFT JOIN services s ON s.shop_id = sh.id AND s.is_active = 1
+            LEFT JOIN shop_settings ss ON ss.shop_id = sh.id
             WHERE sh.is_active = 1
         `;
         const params = [];
@@ -73,6 +75,12 @@ exports.getShopDetail = async (req, res) => {
         );
         if (!shop) return res.render('error', { title: 'Not Found', message: 'Shop not found.', user: req.session.user });
 
+        // Fetch shop settings
+        const [[settings]] = await db.query(
+            'SELECT * FROM shop_settings WHERE shop_id = ?',
+            [shopId]
+        );
+
         const [services] = await db.query(
             'SELECT * FROM services WHERE shop_id = ? AND is_active = 1 ORDER BY created_at DESC',
             [shopId]
@@ -91,6 +99,7 @@ exports.getShopDetail = async (req, res) => {
             title: `${shop.name} – Schedora`,
             user: req.session.user,
             shop,
+            settings: settings || { map_visible: 1, show_distance: 1, location_mode: 'manual' },
             services
         });
     } catch (err) {

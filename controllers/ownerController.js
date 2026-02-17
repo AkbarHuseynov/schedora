@@ -52,23 +52,39 @@ exports.getDashboard = async (req, res) => {
 // GET /owner/shop/setup
 exports.getShopSetup = async (req, res) => {
     const ownerId = req.session.user.id;
-    const [[shop]] = await db.query('SELECT * FROM shops WHERE owner_id = ?', [ownerId]);
-    res.render('owner/shop-setup', {
-        title: 'Shop Setup – Schedora',
-        user: req.session.user,
-        shop
-    });
+    try {
+        const [[shop]] = await db.query('SELECT * FROM shops WHERE owner_id = ?', [ownerId]);
+        let settings = null;
+
+        if (shop) {
+            const [[shopSettings]] = await db.query('SELECT * FROM shop_settings WHERE shop_id = ?', [shop.id]);
+            settings = shopSettings || { location_mode: 'manual', map_visible: 1, show_distance: 1 };
+        }
+
+        res.render('owner/shop-setup', {
+            title: 'Shop Setup – Schedora',
+            user: req.session.user,
+            shop,
+            settings
+        });
+    } catch (err) {
+        console.error(err);
+        res.render('error', { title: 'Error', message: 'Could not load shop setup.', user: req.session.user });
+    }
 };
 
 // POST /owner/shop/setup
 exports.postShopSetup = async (req, res) => {
     const ownerId = req.session.user.id;
-    const { name, description, category, address, phone, latitude, longitude } = req.body;
+    const { name, description, category, address, phone, latitude, longitude, location_mode, map_visible, show_distance } = req.body;
     const coverFile = req.file ? req.file.filename : null;
 
     try {
         const [[existing]] = await db.query('SELECT id FROM shops WHERE owner_id = ?', [ownerId]);
+        let shopId;
+
         if (existing) {
+            shopId = existing.id;
             const updateFields = [name, description, category, address, phone, latitude || null, longitude || null];
             let sql = 'UPDATE shops SET name=?, description=?, category=?, address=?, phone=?, latitude=?, longitude=?';
             if (coverFile) { sql += ', cover_image=?'; updateFields.push(coverFile); }
@@ -76,11 +92,22 @@ exports.postShopSetup = async (req, res) => {
             updateFields.push(ownerId);
             await db.query(sql, updateFields);
         } else {
-            await db.query(
+            const [result] = await db.query(
                 'INSERT INTO shops (owner_id, name, description, category, address, phone, cover_image, latitude, longitude) VALUES (?,?,?,?,?,?,?,?,?)',
                 [ownerId, name, description, category, address, phone, coverFile, latitude || null, longitude || null]
             );
+            shopId = result.insertId;
         }
+
+        // Update or create shop settings
+        await db.query(
+            `INSERT INTO shop_settings (shop_id, location_mode, map_visible, show_distance)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE location_mode=?, map_visible=?, show_distance=?`,
+            [shopId, location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0,
+             location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0]
+        );
+
         req.flash('success', 'Shop profile saved.');
         res.redirect('/owner/dashboard');
     } catch (err) {

@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(where:*)",
+      "Bash(git --version)",
+      "Bash(gh:*)",
+      "Bash(cmd /c:*)",
+      "Bash(GH=\"/c/Program Files/GitHub CLI/gh.exe\")",
+      "Bash(\"$GH\" --version)",
+      "Bash(\"$GH\" auth status)",
+      "Bash(\"$GH\" repo create schedora --public --source=. --remote=origin --push)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(\"$GH\" pr create --title \"Initial build: SCHEDORA booking platform\" --base main --head master --body \"$\\(cat <<''EOF''\n## Summary\n\n- Full-stack Node.js + Express booking & client management platform for barbers, beauty salons, spas and laser centers\n- MySQL database with 6 tables: users, shops, services, service_photos, bookings, wallet_transactions\n- Role-based authentication \\(client / owner / admin\\) with bcrypt + express-session\n- Multi-photo service gallery with Multer upload middleware\n- Wallet system: earnings auto-credited on booking completion, admin adjustment panel\n\n## Features implemented\n\n- **Landing page** — hero, categories, features, how-it-works, CTA sections\n- **Auth** — login, register \\(client or owner\\), role-based redirect\n- **Client flow** — browse shops, filter by category/search, view service carousels, book appointments, cancel bookings\n- **Owner flow** — shop setup, service CRUD with photo gallery, booking management \\(confirm/complete/cancel\\), wallet & transaction history\n- **Admin flow** — user moderation \\(suspend/delete\\), shop moderation, platform-wide booking overview, wallet adjustments\n\n## Test plan\n\n- [ ] Run `npm install` then `node server.js`\n- [ ] Import `database/schema.sql` into MySQL\n- [ ] Set credentials in `.env` \\(copy from `.env.example`\\)\n- [ ] Visit `http://localhost:3000` — landing page renders\n- [ ] Register as client, browse shops, make a booking\n- [ ] Register as owner, set up shop, add service with photos, manage bookings\n- [ ] Log in as admin \\(`admin@schedora.com` / `Admin@1234`\\), review users/shops/bookings\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")",
+      "Bash(git branch:*)",
+      "Bash(\"$GH\" repo edit --default-branch master)",
+      "Bash(\"$GH\" repo edit --default-branch main)",
+      "Bash(\"$GH\" repo view --json name,defaultBranchRef,url)",
+      "Bash(node:*)",
+      "Bash(npm --version:*)",
+      "Bash(del \"C:\\\\Users\\\\ekber\\\\Desktop\\\\SCHEDORA\\\\check_i18n.js\")",
+      "Bash(dir C:UsersekberDesktopSCHEDORA)",
+      "Bash(git reset:*)"
+    ]
+  }
+}

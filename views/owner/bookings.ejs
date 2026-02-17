@@ -6,25 +6,34 @@
 
     <div class="page-header d-flex align-items-center justify-content-between">
         <div>
-            <h2>Manage Bookings</h2>
-            <p class="text-muted mb-0">View and update booking statuses for <strong><%= shop.name %></strong>.</p>
+            <h2 data-i18n="owner_bookings_title">Manage Bookings</h2>
+            <p class="text-muted mb-0"><span data-i18n="owner_bookings_subtitle">View and update booking statuses for</span> <strong><%= shop.name %></strong>.</p>
         </div>
     </div>
 
     <!-- Filter tabs -->
     <div class="d-flex gap-2 mb-4 flex-wrap">
-        <% ['all','pending','confirmed','completed','cancelled'].forEach(function(s) { %>
-            <a href="/owner/bookings<%= s !== 'all' ? '?status=' + s : '' %>"
-               class="btn btn-sm <%= statusFilter === s ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3">
-                <%= s.charAt(0).toUpperCase() + s.slice(1) %>
-            </a>
-        <% }); %>
+        <a href="/owner/bookings"
+           class="btn btn-sm <%= statusFilter === 'all' ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3"
+           data-i18n="owner_filter_all">All</a>
+        <a href="/owner/bookings?status=pending"
+           class="btn btn-sm <%= statusFilter === 'pending' ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3"
+           data-i18n="owner_filter_pending">Pending</a>
+        <a href="/owner/bookings?status=confirmed"
+           class="btn btn-sm <%= statusFilter === 'confirmed' ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3"
+           data-i18n="owner_filter_confirmed">Confirmed</a>
+        <a href="/owner/bookings?status=completed"
+           class="btn btn-sm <%= statusFilter === 'completed' ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3"
+           data-i18n="owner_filter_completed">Completed</a>
+        <a href="/owner/bookings?status=cancelled"
+           class="btn btn-sm <%= statusFilter === 'cancelled' ? 'btn-dark' : 'btn-outline-secondary' %> rounded-pill px-3"
+           data-i18n="owner_filter_cancelled">Cancelled</a>
     </div>
 
     <% if (bookings.length === 0) { %>
         <div class="text-center py-5 bg-white rounded-4 border">
             <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
-            <p class="text-muted">No bookings found for this filter.</p>
+            <p class="text-muted" data-i18n="owner_no_bookings_filter">No bookings found for this filter.</p>
         </div>
     <% } else { %>
         <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
@@ -32,45 +41,45 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Client</th>
-                        <th>Phone</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Update</th>
+                        <th data-i18n="owner_tbl_client">Client</th>
+                        <th data-i18n="owner_tbl_phone">Phone</th>
+                        <th data-i18n="owner_tbl_service">Service</th>
+                        <th data-i18n="owner_tbl_date">Date</th>
+                        <th data-i18n="owner_tbl_time">Time</th>
+                        <th data-i18n="owner_tbl_price">Price</th>
+                        <th data-i18n="owner_tbl_status">Status</th>
+                        <th data-i18n="owner_tbl_update">Update</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% bookings.forEach(function(b) { %>
                         <tr>
-                            <td class="text-muted">#<%= b.id %></td>
-                            <td class="fw-semibold"><%= b.client_name %></td>
-                            <td class="text-muted small"><%= b.client_phone || '—' %></td>
-                            <td><%= b.service_name %></td>
-                            <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
-                            <td><%= b.booking_time.substring(0,5) %></td>
-                            <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
-                            <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
-                            <td>
+                            <td data-label="#">#<%= b.id %></td>
+                            <td data-label="Client" class="fw-semibold"><%= b.client_name %></td>
+                            <td data-label="Phone" class="text-muted small"><%= b.client_phone || '—' %></td>
+                            <td data-label="Service"><%= b.service_name %></td>
+                            <td data-label="Date"><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                            <td data-label="Time"><%= b.booking_time.substring(0,5) %></td>
+                            <td data-label="Price" class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                            <td data-label="Status"><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                            <td data-label="Update">
                                 <% if (b.status === 'pending') { %>
                                     <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
                                         <input type="hidden" name="status" value="confirmed">
-                                        <button class="btn btn-sm btn-outline-primary me-1">Confirm</button>
+                                        <button class="btn btn-sm btn-outline-primary me-1" data-i18n="owner_booking_confirm">Confirm</button>
                                     </form>
                                     <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
                                         <input type="hidden" name="status" value="cancelled">
-                                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                        <button class="btn btn-sm btn-outline-danger" data-i18n="owner_booking_cancel">Cancel</button>
                                     </form>
                                 <% } else if (b.status === 'confirmed') { %>
                                     <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
                                         <input type="hidden" name="status" value="completed">
-                                        <button class="btn btn-sm btn-outline-success me-1">Complete</button>
+                                        <button class="btn btn-sm btn-outline-success me-1" data-i18n="owner_booking_complete">Complete</button>
                                     </form>
                                     <form action="/owner/bookings/<%= b.id %>/status" method="POST" class="d-inline">
                                         <input type="hidden" name="status" value="cancelled">
-                                        <button class="btn btn-sm btn-outline-danger">Cancel</button>
+                                        <button class="btn btn-sm btn-outline-danger" data-i18n="owner_booking_cancel">Cancel</button>
                                     </form>
                                 <% } else { %>
                                     <span class="text-muted small">—</span>

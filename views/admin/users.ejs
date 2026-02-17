@@ -47,24 +47,24 @@
                 <% } %>
                 <% users.forEach(function(u) { %>
                     <tr>
-                        <td class="text-muted">#<%= u.id %></td>
-                        <td class="fw-semibold"><%= u.name %></td>
-                        <td class="text-muted small"><%= u.email %></td>
-                        <td class="text-muted small"><%= u.phone || '—' %></td>
-                        <td>
+                        <td data-label="#">#<%= u.id %></td>
+                        <td data-label="Name" class="fw-semibold"><%= u.name %></td>
+                        <td data-label="Email" class="text-muted small"><%= u.email %></td>
+                        <td data-label="Phone" class="text-muted small"><%= u.phone || '—' %></td>
+                        <td data-label="Role">
                             <% if (u.role === 'admin')  { %><span class="badge bg-dark">Admin</span><% } %>
                             <% if (u.role === 'owner')  { %><span class="badge bg-warning text-dark">Owner</span><% } %>
                             <% if (u.role === 'client') { %><span class="badge bg-info text-dark">Client</span><% } %>
                         </td>
-                        <td>
+                        <td data-label="Status">
                             <% if (u.is_active) { %>
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
                             <% } else { %>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Suspended</span>
                             <% } %>
                         </td>
-                        <td class="text-muted small"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
-                        <td>
+                        <td data-label="Joined" class="text-muted small"><%= new Date(u.created_at).toLocaleDateString('en-GB') %></td>
+                        <td data-label="Actions">
                             <% if (u.id !== user.id) { %>
                                 <form action="/admin/users/<%= u.id %>/toggle" method="POST" class="d-inline">
                                     <button class="btn btn-sm <%= u.is_active ? 'btn-outline-warning' : 'btn-outline-success' %> me-1">

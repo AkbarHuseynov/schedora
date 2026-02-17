@@ -5,63 +5,60 @@
     <%- include('../partials/flash') %>
 
     <div class="page-header">
-        <h2>Wallet</h2>
-        <p class="text-muted mb-0">Track your earnings and transaction history.</p>
+        <h2 data-i18n="owner_wallet_title">Wallet</h2>
+        <p class="text-muted mb-0" data-i18n="owner_wallet_subtitle">Track your earnings and transaction history.</p>
     </div>
 
     <!-- Balance card -->
     <div class="row g-4 mb-5">
         <div class="col-md-5">
             <div class="wallet-balance-card">
-                <p class="text-white opacity-75 small mb-1">Current Balance</p>
+                <p class="small mb-1" style="color:rgba(255,255,255,0.70);" data-i18n="owner_wallet_balance_label">Current Balance</p>
                 <div class="balance-amount mb-1">$<%= parseFloat(shop.wallet_balance).toFixed(2) %></div>
-                <p class="text-white opacity-60 small mb-0"><%= shop.name %></p>
+                <p class="small mb-0" style="color:rgba(255,255,255,0.55);"><%= shop.name %></p>
             </div>
         </div>
         <div class="col-md-7 d-flex flex-column justify-content-center">
-            <h6 class="fw-bold mb-2">How Earnings Work</h6>
-            <p class="text-muted small mb-0">
-                Every time you mark a booking as <strong>Completed</strong>, the booking total is automatically
-                credited to your wallet. Contact the platform admin to withdraw your balance.
-            </p>
+            <h6 class="fw-bold mb-2" data-i18n="owner_wallet_how_it_works">How Earnings Work</h6>
+            <p class="text-muted small mb-0" data-i18n="owner_wallet_how_desc">Every time you mark a booking as Completed, the booking total is automatically credited to your wallet. Contact the platform admin to withdraw your balance.</p>
         </div>
     </div>
 
     <!-- Transactions -->
-    <h5 class="fw-bold mb-3">Transaction History</h5>
+    <h5 class="fw-bold mb-3" data-i18n="owner_wallet_transactions">Transaction History</h5>
     <% if (transactions.length === 0) { %>
         <div class="text-center py-5 bg-white rounded-4 border">
             <i class="bi bi-receipt display-4 text-muted mb-3 d-block"></i>
-            <p class="text-muted">No transactions yet. Complete bookings to earn revenue.</p>
+            <p class="text-muted" data-i18n="owner_no_transactions">No transactions yet. Complete bookings to earn revenue.</p>
         </div>
     <% } else { %>
         <div class="table-responsive table-schedora rounded-4 overflow-hidden shadow-sm">
             <table class="table mb-0">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Note</th>
+                        <th data-i18n="owner_wallet_tbl_date">Date</th>
+                        <th data-i18n="owner_wallet_tbl_type">Type</th>
+                        <th data-i18n="owner_wallet_tbl_amount">Amount</th>
+                        <th data-i18n="owner_wallet_tbl_note">Note</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% transactions.forEach(function(t) { %>
                         <tr>
-                            <td class="text-muted small"><%= new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
-                            <td>
+                            <td data-label="Date" class="text-muted small"><%= new Date(t.created_at).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                            <td data-label="Type">
                                 <% if (t.type === 'credit') { %>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Credit</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" data-i18n="owner_wallet_credit">Credit</span>
                                 <% } else if (t.type === 'debit') { %>
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Debit</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" data-i18n="owner_wallet_debit">Debit</span>
                                 <% } else { %>
-                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Adjustment</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle" data-i18n="owner_wallet_adjustment">Adjustment</span>
                                 <% } %>
                             </td>
-                            <td class="fw-semibold <%= t.type === 'credit' ? 'text-success' : 'text-danger' %>">
+                            <td data-label="Amount" class="fw-semibold <%= t.type === 'credit' ? 'text-success' : 'text-danger' %>">
                                 <%= t.type === 'credit' ? '+' : '-' %>$<%= parseFloat(t.amount).toFixed(2) %>
                             </td>
-                            <td class="text-muted small"><%= t.note || '—' %></td>
+                            <td data-label="Note" class="text-muted small"><%= t.note || '—' %></td>
                         </tr>
                     <% }); %>
                 </tbody>

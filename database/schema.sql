@@ -36,7 +36,22 @@ CREATE TABLE IF NOT EXISTS shops (
     is_active     TINYINT(1)   NOT NULL DEFAULT 1,
     wallet_balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────
+-- SHOP SETTINGS (owner configurations)
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS shop_settings (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    shop_id     INT          NOT NULL UNIQUE,
+    location_mode ENUM('manual','auto') NOT NULL DEFAULT 'manual',
+    map_visible TINYINT(1)   NOT NULL DEFAULT 1,
+    show_distance TINYINT(1) NOT NULL DEFAULT 1,
+    created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────

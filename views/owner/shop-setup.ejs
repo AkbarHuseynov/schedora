@@ -64,21 +64,64 @@
                         </div>
                     </div>
 
-                    <!-- Location coordinates (optional for map display) -->
-                    <div class="mb-3">
-                        <label class="form-label">Location Coordinates (for map display)</label>
-                        <p class="text-muted small mb-3">Add your shop's location so clients can see it on the map. Get coordinates from Google Maps (right-click) or use the fields below.</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label small">Latitude</label>
-                                <input type="number" name="latitude" class="form-control" step="0.00000001"
-                                       value="<%= shop && shop.latitude ? shop.latitude : '' %>" placeholder="e.g. 40.7128">
+                    <!-- Location & Map Settings -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">Location & Map Settings</h5>
+                        <p class="text-muted small mb-4">Control how your shop appears on the map and visibility to clients.</p>
+
+                        <!-- Location coordinates -->
+                        <div class="mb-4">
+                            <label class="form-label">Shop Location Coordinates</label>
+                            <p class="text-muted small mb-3">Get coordinates from Google Maps (right-click on your location and copy the coordinates)</p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small">Latitude</label>
+                                    <input type="number" name="latitude" class="form-control" step="0.00000001"
+                                           value="<%= shop && shop.latitude ? shop.latitude : '' %>" placeholder="e.g. 40.7128">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small">Longitude</label>
+                                    <input type="number" name="longitude" class="form-control" step="0.00000001"
+                                           value="<%= shop && shop.longitude ? shop.longitude : '' %>" placeholder="e.g. -74.0060">
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label small">Longitude</label>
-                                <input type="number" name="longitude" class="form-control" step="0.00000001"
-                                       value="<%= shop && shop.longitude ? shop.longitude : '' %>" placeholder="e.g. -74.0060">
-                            </div>
+                        </div>
+
+                        <!-- Location determination mode -->
+                        <div class="mb-3">
+                            <label class="form-label">Location Detection Mode</label>
+                            <select name="location_mode" class="form-select">
+                                <option value="manual" <%= settings && settings.location_mode === 'manual' ? 'selected' : '' %>>
+                                    Manual (enter coordinates above)
+                                </option>
+                                <option value="auto" <%= settings && settings.location_mode === 'auto' ? 'selected' : '' %>>
+                                    Automatic (from browser location)
+                                </option>
+                            </select>
+                            <small class="text-muted d-block mt-2">
+                                <strong>Manual:</strong> You enter exact coordinates<br>
+                                <strong>Auto:</strong> Client's browser detects their location (when viewing map)
+                            </small>
+                        </div>
+
+                        <!-- Map visibility -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="map_visible" id="map_visible" value="1"
+                                   <%= settings && settings.map_visible ? 'checked' : '' %>>
+                            <label class="form-check-label" for="map_visible">
+                                <strong>Show map to clients</strong>
+                                <small class="text-muted d-block">Display your shop location on the map when clients browse shops</small>
+                            </label>
+                        </div>
+
+                        <!-- Distance display -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="show_distance" id="show_distance" value="1"
+                                   <%= settings && settings.show_distance ? 'checked' : '' %>>
+                            <label class="form-check-label" for="show_distance">
+                                <strong>Show distance from client</strong>
+                                <small class="text-muted d-block">Display approximate distance when clients view your shop (requires their location)</small>
+                            </label>
                         </div>
                     </div>
 

@@ -515,7 +515,7 @@ img { max-width: 100%; object-fit: cover; }
 }
 
 .footer-links a {
-    color: var(--muted);
+    color: rgba(255,255,255,0.55);
     font-size: 0.88rem;
     display: block;
     margin-bottom: 0.5rem;
@@ -594,10 +594,156 @@ img { max-width: 100%; object-fit: cover; }
     margin: 1rem auto;
 }
 
-/* ── Responsive ─────────────────────────────────────── */
+/* ── Language Selector ───────────────────────────────── */
+.lang-selector {
+    background: rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 3px 6px;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 4px 8px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    line-height: 1;
+}
+
+.lang-btn:hover {
+    color: #fff;
+    background: rgba(201,169,110,0.18);
+}
+
+.lang-btn.active {
+    background: var(--gold);
+    color: #1A1A2E;
+}
+
+/* ── Responsive – Tablet (≤992px) ───────────────────── */
+@media (max-width: 992px) {
+    /* Navbar: language selector sits inline with the collapsed menu */
+    .lang-selector { margin-top: 0.5rem; justify-content: flex-start; }
+
+    /* Hero: reduce vertical padding */
+    .hero-section { padding: 3.5rem 0; }
+
+    /* Booking form: stack summary above form */
+    .booking-card .row.g-0 { flex-direction: column; }
+    .booking-card .booking-summary { border-radius: var(--radius) var(--radius) 0 0; }
+
+    /* Stat cards: tighter on tablet */
+    .stat-card { padding: 1.2rem 1rem; gap: 0.8rem; }
+}
+
+/* ── Responsive – Mobile (≤768px) ───────────────────── */
 @media (max-width: 768px) {
-    .hero-section { min-height: auto; padding: 4rem 0; }
-    .hero-title   { font-size: 2rem; }
-    .auth-card    { padding: 2rem 1.5rem; }
-    .sidebar      { min-height: auto; position: static; padding: 0.5rem 0; }
+    /* ── Hero ── */
+    .hero-section   { min-height: auto; padding: 3rem 0 2rem; }
+    .hero-title     { font-size: 2rem; }
+    .hero-subtitle  { font-size: 1rem; }
+    .hero-image-wrap img { height: 280px; border-radius: 14px; }
+    /* Stats row: tighter gap */
+    .hero-section .d-flex.gap-4 { gap: 1.2rem !important; }
+
+    /* ── Auth ── */
+    .auth-page  { padding: 1.5rem 1rem; align-items: flex-start; padding-top: 2rem; }
+    .auth-card  { padding: 1.8rem 1.2rem; max-width: 100% !important; }
+
+    /* ── Sidebar (dashboards) ── */
+    .sidebar { min-height: auto; position: static; padding: 0.5rem 0; }
+
+    /* ── Page header ── */
+    .page-header { padding: 1.2rem 0 0.8rem; }
+    .page-header.d-flex { flex-direction: column; align-items: flex-start !important; gap: 0.75rem; }
+    .page-header h2 { font-size: 1.4rem; }
+
+    /* ── Stat cards: full-width stack ── */
+    .stat-card { padding: 1rem; gap: 0.75rem; }
+    .stat-icon { width: 42px; height: 42px; font-size: 1.1rem; }
+
+    /* ── Tables → stacked card layout on mobile ── */
+    .table-schedora { box-shadow: none; }
+    .table-schedora thead { display: none; }
+    .table-schedora tbody tr {
+        display: block;
+        background: #fff;
+        border-radius: var(--radius);
+        border: 1px solid rgba(0,0,0,0.08);
+        margin-bottom: 0.75rem;
+        padding: 1rem;
+        box-shadow: var(--shadow);
+    }
+    .table-schedora td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.35rem 0;
+        border: none;
+        font-size: 0.88rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .table-schedula td:last-child { border-bottom: none; }
+    .table-schedora td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.78rem;
+        color: var(--dark);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        min-width: 80px;
+    }
+    /* Remove label on the # column */
+    .table-schedora td:first-child { color: var(--muted); font-size: 0.82rem; }
+
+    /* ── Booking card (form+summary) ── */
+    .booking-card { border-radius: var(--radius); }
+    .booking-summary { padding: 1.5rem; border-radius: var(--radius) var(--radius) 0 0; }
+    .booking-summary .price-tag { font-size: 1.6rem; }
+
+    /* ── Section titles ── */
+    .section-title { font-size: 1.75rem; }
+
+    /* ── Landing: category cards ── */
+    .category-card { height: 160px; }
+
+    /* ── Landing: feature cards gap ── */
+    .features-section { padding: 3rem 0; }
+
+    /* ── Landing: "For Business" section ── */
+    section .biz-img { height: 260px !important; }
+
+    /* ── Landing: CTA buttons stack ── */
+    .cta-btns { flex-direction: column; align-items: stretch; }
+    .cta-btns .btn { width: 100%; }
+
+    /* ── Forms: filter rows ── */
+    .filter-row { gap: 0.5rem; }
+
+    /* ── Cards: reduce internal padding on mobile ── */
+    .card-schedora .p-4 { padding: 1rem !important; }
+
+    /* ── Wallet balance card ── */
+    .wallet-balance-card { padding: 1.5rem; }
+    .wallet-balance-card .balance-amount { font-size: 2.2rem; }
+
+    /* ── Language selector ── */
+    .lang-selector { margin-top: 0.25rem; }
+}
+
+/* ── Responsive – Small Mobile (≤480px) ─────────────── */
+@media (max-width: 480px) {
+    .hero-title  { font-size: 1.7rem; }
+    .section-title { font-size: 1.5rem; }
+    .auth-card   { padding: 1.5rem 1rem; }
+    .stat-card   { gap: 0.5rem; }
+    /* Booking form buttons stack */
+    .booking-card .d-flex.gap-3 { flex-direction: column; }
+    .booking-card .d-flex.gap-3 .btn-outline-gold,
+    .booking-card .d-flex.gap-3 .btn-gold { width: 100%; text-align: center; }
 }

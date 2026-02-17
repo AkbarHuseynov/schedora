@@ -6,21 +6,21 @@
 
     <div class="page-header d-flex align-items-center justify-content-between">
         <div>
-            <h2>My Bookings</h2>
-            <p class="text-muted mb-0">All your appointments in one place.</p>
+            <h2 data-i18n="bookings_title">My Bookings</h2>
+            <p class="text-muted mb-0" data-i18n="bookings_subtitle">All your appointments in one place.</p>
         </div>
         <a href="/client/shops" class="btn-gold px-4 py-2 d-none d-md-inline-flex align-items-center gap-2">
-            <i class="bi bi-plus"></i> New Booking
+            <i class="bi bi-plus"></i> <span data-i18n="bookings_new">New Booking</span>
         </a>
     </div>
 
     <% if (bookings.length === 0) { %>
         <div class="text-center py-5 bg-white rounded-4 border">
             <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
-            <h5 class="text-muted">No bookings yet</h5>
-            <p class="text-muted small">Browse services and book your first appointment.</p>
+            <h5 class="text-muted" data-i18n="bookings_no_bookings">No bookings yet</h5>
+            <p class="text-muted small" data-i18n="bookings_no_bookings_desc">Browse services and book your first appointment.</p>
             <a href="/client/shops" class="btn-gold px-4 py-2 mt-2 d-inline-flex align-items-center gap-2">
-                <i class="bi bi-search"></i> Browse Now
+                <i class="bi bi-search"></i> <span data-i18n="bookings_browse_now">Browse Now</span>
             </a>
         </div>
     <% } else { %>
@@ -29,31 +29,32 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Service</th>
-                        <th>Shop</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th data-i18n="bookings_col_service">Service</th>
+                        <th data-i18n="bookings_col_shop">Shop</th>
+                        <th data-i18n="bookings_col_date">Date</th>
+                        <th data-i18n="bookings_col_time">Time</th>
+                        <th data-i18n="bookings_col_price">Price</th>
+                        <th data-i18n="bookings_col_status">Status</th>
+                        <th data-i18n="bookings_col_action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% bookings.forEach(function(b) { %>
                         <tr>
-                            <td class="text-muted">#<%= b.id %></td>
-                            <td class="fw-semibold"><%= b.service_name %></td>
-                            <td><%= b.shop_name %></td>
-                            <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
-                            <td><%= b.booking_time.substring(0,5) %></td>
-                            <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
-                            <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
-                            <td>
+                            <td data-label="#">#<%= b.id %></td>
+                            <td data-label="Service" class="fw-semibold"><%= b.service_name %></td>
+                            <td data-label="Shop"><%= b.shop_name %></td>
+                            <td data-label="Date"><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                            <td data-label="Time"><%= b.booking_time.substring(0,5) %></td>
+                            <td data-label="Price" class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                            <td data-label="Status"><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                            <td data-label="Action">
                                 <% if (['pending','confirmed'].includes(b.status)) { %>
                                     <form action="/client/bookings/<%= b.id %>/cancel" method="POST" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                data-i18n-confirm="bookings_confirm_cancel"
                                                 data-confirm="Are you sure you want to cancel this booking?">
-                                            Cancel
+                                            <span data-i18n="bookings_cancel">Cancel</span>
                                         </button>
                                     </form>
                                 <% } else { %>

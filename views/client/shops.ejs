@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const shopsData = [
         <% shops.forEach((shop, idx) => { %>
-            <% if (shop.latitude && shop.longitude) { %>
+            <% if (shop.latitude && shop.longitude && shop.map_visible) { %>
                 {
                     id: <%= shop.id %>,
                     name: '<%- shop.name %>',

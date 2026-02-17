@@ -7,11 +7,11 @@
     <!-- Page header -->
     <div class="page-header d-flex align-items-center justify-content-between">
         <div>
-            <h2>Welcome back, <%= user.name.split(' ')[0] %> 👋</h2>
-            <p class="text-muted mb-0">Manage your bookings and discover new services.</p>
+            <h2><span data-i18n="dash_welcome">Welcome back</span>, <%= user.name.split(' ')[0] %> 👋</h2>
+            <p class="text-muted mb-0" data-i18n="dash_subtitle">Manage your bookings and discover new services.</p>
         </div>
         <a href="/client/shops" class="btn-gold px-4 py-2 d-none d-md-inline-flex align-items-center gap-2">
-            <i class="bi bi-search"></i> Browse Services
+            <i class="bi bi-search"></i> <span data-i18n="dash_browse_services">Browse Services</span>
         </a>
     </div>
 
@@ -21,7 +21,7 @@
             <a href="/client/shops" class="d-block">
                 <div class="stat-card flex-column text-center py-4 h-100">
                     <div class="stat-icon gold mx-auto mb-2"><i class="bi bi-shop"></i></div>
-                    <div class="fw-semibold small">Browse Shops</div>
+                    <div class="fw-semibold small" data-i18n="dash_browse_shops">Browse Shops</div>
                 </div>
             </a>
         </div>
@@ -29,7 +29,7 @@
             <a href="/client/bookings" class="d-block">
                 <div class="stat-card flex-column text-center py-4 h-100">
                     <div class="stat-icon blue mx-auto mb-2"><i class="bi bi-calendar2-check"></i></div>
-                    <div class="fw-semibold small">My Bookings</div>
+                    <div class="fw-semibold small" data-i18n="dash_my_bookings">My Bookings</div>
                 </div>
             </a>
         </div>
@@ -37,7 +37,7 @@
             <a href="/client/shops?category=barber" class="d-block">
                 <div class="stat-card flex-column text-center py-4 h-100">
                     <div class="stat-icon purple mx-auto mb-2"><i class="bi bi-scissors"></i></div>
-                    <div class="fw-semibold small">Barbers</div>
+                    <div class="fw-semibold small" data-i18n="dash_barbers">Barbers</div>
                 </div>
             </a>
         </div>
@@ -45,21 +45,21 @@
             <a href="/client/shops?category=spa" class="d-block">
                 <div class="stat-card flex-column text-center py-4 h-100">
                     <div class="stat-icon green mx-auto mb-2"><i class="bi bi-flower1"></i></div>
-                    <div class="fw-semibold small">Spa & Laser</div>
+                    <div class="fw-semibold small" data-i18n="dash_spa_laser">Spa & Laser</div>
                 </div>
             </a>
         </div>
     </div>
 
     <!-- Upcoming bookings -->
-    <h4 class="fw-bold mb-4">Upcoming Appointments</h4>
+    <h4 class="fw-bold mb-4" data-i18n="dash_upcoming">Upcoming Appointments</h4>
     <% if (upcoming.length === 0) { %>
         <div class="text-center py-5 bg-white rounded-4 border">
             <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
-            <h5 class="text-muted">No upcoming appointments</h5>
-            <p class="text-muted small">Browse services and make your first booking today.</p>
+            <h5 class="text-muted" data-i18n="dash_no_upcoming">No upcoming appointments</h5>
+            <p class="text-muted small" data-i18n="dash_no_upcoming_desc">Browse services and make your first booking today.</p>
             <a href="/client/shops" class="btn-gold px-4 py-2 mt-2 d-inline-flex align-items-center gap-2">
-                <i class="bi bi-search"></i> Browse Now
+                <i class="bi bi-search"></i> <span data-i18n="dash_browse_now">Browse Now</span>
             </a>
         </div>
     <% } else { %>
@@ -82,8 +82,10 @@
                             <span class="fw-bold text-gold">$<%= parseFloat(b.total_price).toFixed(2) %></span>
                             <% if (['pending','confirmed'].includes(b.status)) { %>
                                 <form action="/client/bookings/<%= b.id %>/cancel" method="POST" class="mb-0">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Cancel this booking?">
-                                        Cancel
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            data-i18n-confirm="bookings_confirm_cancel"
+                                            data-confirm="Cancel this booking?">
+                                        <span data-i18n="dash_cancel">Cancel</span>
                                     </button>
                                 </form>
                             <% } %>
@@ -94,7 +96,7 @@
         </div>
         <div class="text-center mt-4">
             <a href="/client/bookings" class="btn-outline-gold px-4 py-2 d-inline-flex align-items-center gap-2">
-                View All Bookings <i class="bi bi-arrow-right"></i>
+                <span data-i18n="dash_view_all">View All Bookings</span> <i class="bi bi-arrow-right"></i>
             </a>
         </div>
     <% } %>

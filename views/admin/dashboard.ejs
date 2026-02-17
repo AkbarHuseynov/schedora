@@ -109,13 +109,13 @@
                 <% } %>
                 <% recentBookings.forEach(function(b) { %>
                     <tr>
-                        <td class="text-muted">#<%= b.id %></td>
-                        <td class="fw-semibold"><%= b.client_name %></td>
-                        <td><%= b.shop_name %></td>
-                        <td><%= b.service_name %></td>
-                        <td><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
-                        <td class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
-                        <td><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
+                        <td data-label="#">#<%= b.id %></td>
+                        <td data-label="Client" class="fw-semibold"><%= b.client_name %></td>
+                        <td data-label="Shop"><%= b.shop_name %></td>
+                        <td data-label="Service"><%= b.service_name %></td>
+                        <td data-label="Date"><%= new Date(b.booking_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) %></td>
+                        <td data-label="Price" class="text-gold fw-semibold">$<%= parseFloat(b.total_price).toFixed(2) %></td>
+                        <td data-label="Status"><span class="status-badge badge-<%= b.status %>"><%= b.status %></span></td>
                     </tr>
                 <% }); %>
             </tbody>

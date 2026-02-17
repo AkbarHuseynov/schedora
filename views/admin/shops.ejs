@@ -40,21 +40,21 @@
                 <% } %>
                 <% shops.forEach(function(s) { %>
                     <tr>
-                        <td class="text-muted">#<%= s.id %></td>
-                        <td class="fw-semibold"><%= s.name %></td>
-                        <td><span class="shop-badge"><%= s.category %></span></td>
-                        <td class="text-muted small"><%= s.owner_name %></td>
-                        <td class="text-center"><%= s.service_count %></td>
-                        <td class="text-center"><%= s.booking_count %></td>
-                        <td class="text-gold fw-semibold">$<%= parseFloat(s.wallet_balance).toFixed(2) %></td>
-                        <td>
+                        <td data-label="#">#<%= s.id %></td>
+                        <td data-label="Shop" class="fw-semibold"><%= s.name %></td>
+                        <td data-label="Category"><span class="shop-badge"><%= s.category %></span></td>
+                        <td data-label="Owner" class="text-muted small"><%= s.owner_name %></td>
+                        <td data-label="Services" class="text-center"><%= s.service_count %></td>
+                        <td data-label="Bookings" class="text-center"><%= s.booking_count %></td>
+                        <td data-label="Wallet" class="text-gold fw-semibold">$<%= parseFloat(s.wallet_balance).toFixed(2) %></td>
+                        <td data-label="Status">
                             <% if (s.is_active) { %>
                                 <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
                             <% } else { %>
                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactive</span>
                             <% } %>
                         </td>
-                        <td>
+                        <td data-label="Actions">
                             <form action="/admin/shops/<%= s.id %>/toggle" method="POST" class="d-inline">
                                 <button class="btn btn-sm <%= s.is_active ? 'btn-outline-warning' : 'btn-outline-success' %> me-1">
                                     <%= s.is_active ? 'Suspend' : 'Activate' %>

@@ -6,21 +6,21 @@
 
     <div class="page-header d-flex align-items-center justify-content-between">
         <div>
-            <h2>My Services</h2>
-            <p class="text-muted mb-0">Manage the services offered at <strong><%= shop.name %></strong>.</p>
+            <h2 data-i18n="owner_services_title">My Services</h2>
+            <p class="text-muted mb-0"><span data-i18n="owner_services_subtitle">Manage the services offered at</span> <strong><%= shop.name %></strong>.</p>
         </div>
         <a href="/owner/services/new" class="btn-gold px-4 py-2 d-inline-flex align-items-center gap-2">
-            <i class="bi bi-plus-lg"></i> Add Service
+            <i class="bi bi-plus-lg"></i> <span data-i18n="owner_add_service_btn">Add Service</span>
         </a>
     </div>
 
     <% if (services.length === 0) { %>
         <div class="text-center py-5 bg-white rounded-4 border">
             <i class="bi bi-grid display-3 text-muted mb-3 d-block"></i>
-            <h5 class="text-muted">No services yet</h5>
-            <p class="text-muted small">Add your first service so clients can start booking.</p>
+            <h5 class="text-muted" data-i18n="owner_no_services_title">No services yet</h5>
+            <p class="text-muted small" data-i18n="owner_no_services_desc">Add your first service so clients can start booking.</p>
             <a href="/owner/services/new" class="btn-gold px-5 py-2 mt-2 d-inline-flex align-items-center gap-2">
-                <i class="bi bi-plus-lg"></i> Add Service
+                <i class="bi bi-plus-lg"></i> <span data-i18n="owner_add_service_btn">Add Service</span>
             </a>
         </div>
     <% } else { %>
@@ -70,12 +70,13 @@
                             <div class="d-flex gap-2">
                                 <a href="/owner/services/<%= svc.id %>/edit"
                                    class="btn-outline-gold flex-fill py-2 text-center small">
-                                    <i class="bi bi-pencil me-1"></i>Edit
+                                    <i class="bi bi-pencil me-1"></i><span data-i18n="owner_edit_btn">Edit</span>
                                 </a>
                                 <form action="/owner/services/<%= svc.id %>/delete" method="POST" class="flex-fill">
                                     <button type="submit" class="btn btn-outline-danger w-100 py-2 small"
-                                            data-confirm="Delete this service? This cannot be undone.">
-                                        <i class="bi bi-trash me-1"></i>Delete
+                                            data-confirm="Delete this service? This cannot be undone."
+                                            data-i18n-confirm="owner_delete_confirm">
+                                        <i class="bi bi-trash me-1"></i><span data-i18n="owner_delete_btn">Delete</span>
                                     </button>
                                 </form>
                             </div>
