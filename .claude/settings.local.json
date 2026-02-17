@@ -23,7 +23,8 @@
       "Bash(npm --version:*)",
       "Bash(del \"C:\\\\Users\\\\ekber\\\\Desktop\\\\SCHEDORA\\\\check_i18n.js\")",
       "Bash(dir C:UsersekberDesktopSCHEDORA)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(mysql:*)"
     ]
   }
 }

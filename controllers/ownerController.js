@@ -76,7 +76,22 @@ exports.getShopSetup = async (req, res) => {
 // POST /owner/shop/setup
 exports.postShopSetup = async (req, res) => {
     const ownerId = req.session.user.id;
-    const { name, description, category, address, phone, latitude, longitude, location_mode, map_visible, show_distance } = req.body;
+    const { name, description, category, address, phone, location_mode, map_visible, show_distance } = req.body;
+
+    // Convert latitude and longitude to proper numbers (or null if empty)
+    let latitude = req.body.latitude ? parseFloat(req.body.latitude) : null;
+    let longitude = req.body.longitude ? parseFloat(req.body.longitude) : null;
+
+    // Validate coordinates if provided
+    if (latitude !== null && (isNaN(latitude) || latitude < -90 || latitude > 90)) {
+        req.flash('error', 'Invalid latitude. Must be between -90 and 90.');
+        return res.redirect('/owner/shop/setup');
+    }
+    if (longitude !== null && (isNaN(longitude) || longitude < -180 || longitude > 180)) {
+        req.flash('error', 'Invalid longitude. Must be between -180 and 180.');
+        return res.redirect('/owner/shop/setup');
+    }
+
     const coverFile = req.file ? req.file.filename : null;
 
     try {
