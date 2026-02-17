@@ -84,7 +84,7 @@
                             <% if (shop && shop.latitude && shop.longitude) { %>
                                 <div class="alert alert-success mt-3 mb-0">
                                     <i class="bi bi-check-circle me-2"></i>
-                                    <strong>Location selected:</strong> <%= shop.latitude.toFixed(6) %>, <%= shop.longitude.toFixed(6) %>
+                                    <strong>Location selected:</strong> <%= parseFloat(shop.latitude).toFixed(6) %>, <%= parseFloat(shop.longitude).toFixed(6) %>
                                 </div>
                             <% } else { %>
                                 <div class="alert alert-info mt-3 mb-0">
