@@ -72,19 +72,22 @@
                         <!-- Location coordinates -->
                         <div class="mb-4">
                             <label class="form-label">Shop Location Coordinates</label>
-                            <p class="text-muted small mb-3">Get coordinates from Google Maps (right-click on your location and copy the coordinates)</p>
+                            <p class="text-muted small mb-3">Click the map button to select your location, or enter coordinates manually</p>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label small">Latitude</label>
-                                    <input type="number" name="latitude" class="form-control" step="0.00000001"
+                                    <input type="number" name="latitude" id="latitude-input" class="form-control" step="0.00000001"
                                            value="<%= shop && shop.latitude ? shop.latitude : '' %>" placeholder="e.g. 40.7128">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label small">Longitude</label>
-                                    <input type="number" name="longitude" class="form-control" step="0.00000001"
+                                    <input type="number" name="longitude" id="longitude-input" class="form-control" step="0.00000001"
                                            value="<%= shop && shop.longitude ? shop.longitude : '' %>" placeholder="e.g. -74.0060">
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mt-3" id="open-map-picker-btn">
+                                <i class="bi bi-map me-2"></i>Select Location on Map
+                            </button>
                         </div>
 
                         <!-- Location determination mode -->
@@ -137,5 +140,160 @@
         </div>
     </div>
 </div>
+
+<!-- Location Picker Modal -->
+<div class="modal fade" id="locationPickerModal" tabindex="-1" aria-labelledby="locationPickerLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="locationPickerLabel">Select Shop Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="location-picker-map" style="height: 500px; border-radius: 8px; margin-bottom: 15px;"></div>
+                <div class="alert alert-info mb-0">
+                    <small><i class="bi bi-info-circle me-2"></i>Click on the map to select your shop's location. The marker will appear where you click.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="flex-grow-1">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small d-block">Latitude:</label>
+                            <span id="selected-lat" class="badge bg-secondary">Not selected</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small d-block">Longitude:</label>
+                            <span id="selected-lng" class="badge bg-secondary">Not selected</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gold" id="confirm-location-btn">Confirm Location</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet CSS & JS for location picker -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let locationPickerMap = null;
+    let selectedMarker = null;
+    let selectedLat = null;
+    let selectedLng = null;
+    const latInput = document.getElementById('latitude-input');
+    const lngInput = document.getElementById('longitude-input');
+    const openMapBtn = document.getElementById('open-map-picker-btn');
+    const modal = new bootstrap.Modal(document.getElementById('locationPickerModal'));
+    const confirmBtn = document.getElementById('confirm-location-btn');
+    const selectedLatBadge = document.getElementById('selected-lat');
+    const selectedLngBadge = document.getElementById('selected-lng');
+
+    openMapBtn.addEventListener('click', function() {
+        modal.show();
+        // Initialize map on modal show (to avoid sizing issues)
+        setTimeout(initializeLocationPicker, 500);
+    });
+
+    function initializeLocationPicker() {
+        if (locationPickerMap) return; // Already initialized
+
+        // Get current coordinates or use default
+        const currentLat = parseFloat(latInput.value) || 40.7128;
+        const currentLng = parseFloat(lngInput.value) || -74.0060;
+
+        locationPickerMap = L.map('location-picker-map').setView([currentLat, currentLng], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(locationPickerMap);
+
+        // Add existing marker if coordinates already set
+        if (latInput.value && lngInput.value) {
+            selectedLat = parseFloat(latInput.value);
+            selectedLng = parseFloat(lngInput.value);
+            addMarker(selectedLat, selectedLng);
+            updateBadges();
+        }
+
+        // Handle map clicks
+        locationPickerMap.on('click', function(e) {
+            selectedLat = e.latlng.lat;
+            selectedLng = e.latlng.lng;
+            addMarker(selectedLat, selectedLng);
+            updateBadges();
+        });
+    }
+
+    function addMarker(lat, lng) {
+        if (selectedMarker) {
+            locationPickerMap.removeLayer(selectedMarker);
+        }
+        selectedMarker = L.circleMarker([lat, lng], {
+            radius: 10,
+            fillColor: '#C9A96E',
+            color: '#A8894E',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(locationPickerMap);
+
+        // Add popup
+        selectedMarker.bindPopup(`
+            <div class="text-center">
+                <strong>Selected Location</strong><br>
+                <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+            </div>
+        `).openPopup();
+
+        // Center map on marker
+        locationPickerMap.setView([lat, lng], locationPickerMap.getZoom());
+    }
+
+    function updateBadges() {
+        if (selectedLat !== null && selectedLng !== null) {
+            selectedLatBadge.textContent = selectedLat.toFixed(6);
+            selectedLatBadge.classList.remove('bg-secondary');
+            selectedLatBadge.classList.add('bg-success');
+
+            selectedLngBadge.textContent = selectedLng.toFixed(6);
+            selectedLngBadge.classList.remove('bg-secondary');
+            selectedLngBadge.classList.add('bg-success');
+        }
+    }
+
+    confirmBtn.addEventListener('click', function() {
+        if (selectedLat !== null && selectedLng !== null) {
+            latInput.value = selectedLat;
+            lngInput.value = selectedLng;
+            modal.hide();
+            // Clean up map on modal hide
+            setTimeout(() => {
+                if (locationPickerMap) {
+                    locationPickerMap.off();
+                    locationPickerMap.remove();
+                    locationPickerMap = null;
+                    selectedMarker = null;
+                }
+            }, 300);
+        }
+    });
+
+    // Clean up map when modal is hidden
+    document.getElementById('locationPickerModal').addEventListener('hidden.bs.modal', function() {
+        if (locationPickerMap) {
+            locationPickerMap.off();
+            locationPickerMap.remove();
+            locationPickerMap = null;
+            selectedMarker = null;
+        }
+    });
+});
+</script>
 
 <%- include('../partials/footer') %>

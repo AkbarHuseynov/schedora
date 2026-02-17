@@ -79,6 +79,16 @@
                                 <span><i class="bi bi-grid me-1"></i><%= shop.service_count %> <span data-i18n="shops_services">services</span></span>
                             </div>
 
+                            <% if (shop.latitude && shop.longitude && shop.map_visible) { %>
+                                <div class="text-center mb-3">
+                                    <button type="button" class="btn btn-sm btn-outline-gold view-location-btn"
+                                            data-lat="<%= shop.latitude %>" data-lng="<%= shop.longitude %>"
+                                            data-name="<%= shop.name %>" data-address="<%= shop.address %>">
+                                        <i class="bi bi-map me-1"></i>View Location
+                                    </button>
+                                </div>
+                            <% } %>
+
                             <a href="/client/shops/<%= shop.id %>" class="btn-gold w-100 py-2 text-center d-block" data-i18n="shops_view">
                                 View Shop
                             </a>
@@ -159,6 +169,116 @@ document.addEventListener('DOMContentLoaded', function() {
             `);
         });
     }
+});
+
+// Location preview modal
+document.addEventListener('DOMContentLoaded', function() {
+    const viewLocationBtns = document.querySelectorAll('.view-location-btn');
+    let locationModal = null;
+    let locationMap = null;
+
+    viewLocationBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const lat = parseFloat(this.dataset.lat);
+            const lng = parseFloat(this.dataset.lng);
+            const name = this.dataset.name;
+            const address = this.dataset.address;
+            const shopCard = this.closest('.col-sm-6');
+            const shopLink = shopCard.querySelector('[href*="/client/shops/"]');
+            const shopId = shopLink.href.split('/').pop();
+
+            showLocationModal(lat, lng, name, address, shopId);
+        });
+    });
+
+    function showLocationModal(lat, lng, name, address, shopId) {
+        // Create modal HTML if not exists
+        if (!document.getElementById('locationViewModal')) {
+            const modalHtml = `
+                <div class="modal fade" id="locationViewModal" tabindex="-1" aria-labelledby="locationViewLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="locationViewLabel">Shop Location</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6 class="mb-2" id="location-shop-name"></h6>
+                                <p class="text-muted small mb-3" id="location-shop-address"></p>
+                                <div id="location-preview-map" style="height: 400px; border-radius: 8px; margin-bottom: 15px;"></div>
+                                <div class="row g-2 text-center">
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Latitude</small>
+                                        <strong id="location-lat"></strong>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted d-block">Longitude</small>
+                                        <strong id="location-lng"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a href="" id="view-full-shop-btn" class="btn btn-gold">View Full Shop</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // Update modal content
+        document.getElementById('location-shop-name').textContent = name;
+        document.getElementById('location-shop-address').textContent = address;
+        document.getElementById('location-lat').textContent = lat.toFixed(6);
+        document.getElementById('location-lng').textContent = lng.toFixed(6);
+        document.getElementById('view-full-shop-btn').href = `/client/shops/${shopId}`;
+
+        // Show modal
+        locationModal = new bootstrap.Modal(document.getElementById('locationViewModal'));
+        locationModal.show();
+
+        // Initialize map on modal show
+        setTimeout(() => initializeLocationPreviewMap(lat, lng), 300);
+    }
+
+    function initializeLocationPreviewMap(lat, lng) {
+        const mapContainer = document.getElementById('location-preview-map');
+        if (!mapContainer) return;
+
+        // Remove old map if exists
+        if (locationMap) {
+            locationMap.off();
+            locationMap.remove();
+        }
+
+        locationMap = L.map('location-preview-map').setView([lat, lng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(locationMap);
+
+        L.circleMarker([lat, lng], {
+            radius: 10,
+            fillColor: '#C9A96E',
+            color: '#A8894E',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.9
+        }).addTo(locationMap);
+    }
+
+    // Clean up map on modal hide
+    document.addEventListener('hidden.bs.modal', function(e) {
+        if (e.target.id === 'locationViewModal' && locationMap) {
+            locationMap.off();
+            locationMap.remove();
+            locationMap = null;
+        }
+    });
 });
 </script>
 
