@@ -5,8 +5,8 @@
     <%- include('../partials/flash') %>
 
     <div class="page-header">
-        <h2><%= shop ? 'Shop Settings' : 'Set Up Your Shop' %></h2>
-        <p class="text-muted mb-0"><%= shop ? 'Update your shop profile and details.' : 'Fill in your shop details to start accepting bookings.' %></p>
+        <h2 data-i18n="<%= shop ? 'owner_shop_settings_title' : 'owner_shop_setup_title' %>"><%= shop ? 'Shop Settings' : 'Set Up Your Shop' %></h2>
+        <p class="text-muted mb-0" data-i18n="<%= shop ? 'owner_shop_settings_sub' : 'owner_shop_setup_sub' %>"><%= shop ? 'Update your shop profile and details.' : 'Fill in your shop details to start accepting bookings.' %></p>
     </div>
 
     <div class="row justify-content-center">
@@ -16,7 +16,7 @@
 
                     <!-- Cover image -->
                     <div class="mb-4">
-                        <label class="form-label">Cover Image</label>
+                        <label class="form-label" data-i18n="owner_shop_cover">Cover Image</label>
                         <% if (shop && shop.cover_image) { %>
                             <img src="/uploads/<%= shop.cover_image %>" id="coverPreviewImg"
                                  class="cover-preview d-block mb-2" style="display:block!important;">
@@ -24,49 +24,69 @@
                             <img id="coverPreviewImg" src="" class="cover-preview d-none mb-2">
                         <% } %>
                         <input type="file" name="cover_image" id="cover_image" class="form-control" accept="image/*">
-                        <small class="text-muted">Recommended: 1200×400px. Max 5MB.</small>
+                        <small class="text-muted" data-i18n="owner_shop_cover_help">Recommended: 1200×400px. Max 5MB.</small>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Shop Name <span class="text-danger">*</span></label>
+                        <label class="form-label" data-i18n="owner_shop_name">Shop Name</label> <span class="text-danger">*</span>
                         <input type="text" name="name" class="form-control" required
                                value="<%= shop ? shop.name : '' %>" placeholder="e.g. The Golden Cut">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Category <span class="text-danger">*</span></label>
+                        <label class="form-label" data-i18n="owner_shop_category">Category</label> <span class="text-danger">*</span>
                         <select name="category" class="form-select" required>
-                            <option value="barber" <%= shop && shop.category === 'barber' ? 'selected' : '' %>>Barber</option>
-                            <option value="beauty" <%= shop && shop.category === 'beauty' ? 'selected' : '' %>>Beauty Salon</option>
-                            <option value="spa"    <%= shop && shop.category === 'spa'    ? 'selected' : '' %>>Spa</option>
-                            <option value="laser"  <%= shop && shop.category === 'laser'  ? 'selected' : '' %>>Laser</option>
-                            <option value="other"  <%= shop && shop.category === 'other'  ? 'selected' : '' %>>Other</option>
+                            <option value="barber" <%= shop && shop.category === 'barber' ? 'selected' : '' %> data-i18n="shops_barber">Barber</option>
+                            <option value="beauty" <%= shop && shop.category === 'beauty' ? 'selected' : '' %> data-i18n="shops_beauty">Beauty Salon</option>
+                            <option value="spa"    <%= shop && shop.category === 'spa'    ? 'selected' : '' %> data-i18n="shops_spa">Spa</option>
+                            <option value="laser"  <%= shop && shop.category === 'laser'  ? 'selected' : '' %> data-i18n="shops_laser">Laser</option>
+                            <option value="other"  <%= shop && shop.category === 'other'  ? 'selected' : '' %> data-i18n="shops_other">Other</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Description</label>
+                        <label class="form-label" data-i18n="owner_shop_desc">Description</label>
                         <textarea name="description" class="form-control" rows="3"
-                                  placeholder="Describe your shop and services..."><%= shop ? shop.description : '' %></textarea>
+                                  placeholder="Describe your shop and services..."
+                                  data-i18n-placeholder="owner_shop_desc_ph"><%= shop ? shop.description : '' %></textarea>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
-                            <label class="form-label">Address</label>
+                            <label class="form-label" data-i18n="owner_shop_address">Address</label>
                             <input type="text" name="address" class="form-control"
                                    value="<%= shop ? shop.address : '' %>" placeholder="123 Main St, City">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">Phone</label>
+                            <label class="form-label" data-i18n="owner_shop_phone">Phone</label>
                             <input type="tel" name="phone" class="form-control"
                                    value="<%= shop ? shop.phone : '' %>" placeholder="+1 555 0000">
                         </div>
                     </div>
 
+                    <!-- Location coordinates (optional for map display) -->
+                    <div class="mb-3">
+                        <label class="form-label">Location Coordinates (for map display)</label>
+                        <p class="text-muted small mb-3">Add your shop's location so clients can see it on the map. Get coordinates from Google Maps (right-click) or use the fields below.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small">Latitude</label>
+                                <input type="number" name="latitude" class="form-control" step="0.00000001"
+                                       value="<%= shop && shop.latitude ? shop.latitude : '' %>" placeholder="e.g. 40.7128">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small">Longitude</label>
+                                <input type="number" name="longitude" class="form-control" step="0.00000001"
+                                       value="<%= shop && shop.longitude ? shop.longitude : '' %>" placeholder="e.g. -74.0060">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="d-flex gap-3 mt-4">
-                        <a href="/owner/dashboard" class="btn-outline-gold flex-fill py-3 text-center">Cancel</a>
+                        <a href="/owner/dashboard" class="btn-outline-gold flex-fill py-3 text-center" data-i18n="owner_shop_cancel">Cancel</a>
                         <button type="submit" class="btn-gold flex-fill py-3 fw-semibold">
-                            <i class="bi bi-check-lg me-1"></i> <%= shop ? 'Save Changes' : 'Create Shop' %>
+                            <i class="bi bi-check-lg me-1"></i>
+                            <span data-i18n="<%= shop ? 'owner_shop_save' : 'owner_shop_create' %>"><%= shop ? 'Save Changes' : 'Create Shop' %></span>
                         </button>
                     </div>
                 </form>

@@ -6,8 +6,8 @@
 
     <!-- Page header + search -->
     <div class="page-header">
-        <h2>Browse Shops & Services</h2>
-        <p class="text-muted">Discover top-rated barbers, salons, spas and laser centers near you.</p>
+        <h2 data-i18n="shops_title">Browse Shops & Services</h2>
+        <p class="text-muted" data-i18n="shops_subtitle">Discover top-rated barbers, salons, spas and laser centers near you.</p>
     </div>
 
     <!-- Filter bar -->
@@ -15,30 +15,41 @@
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" name="search" class="form-control" placeholder="Search shops..." value="<%= search %>">
+                <input type="text" name="search" class="form-control"
+                       data-i18n-placeholder="shops_search_placeholder"
+                       placeholder="Search shops..." value="<%= search %>">
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <select name="category" class="form-select">
-                <option value="all"    <%= category === 'all'    ? 'selected' : '' %>>All Categories</option>
-                <option value="barber" <%= category === 'barber' ? 'selected' : '' %>>Barber</option>
-                <option value="beauty" <%= category === 'beauty' ? 'selected' : '' %>>Beauty Salon</option>
-                <option value="spa"    <%= category === 'spa'    ? 'selected' : '' %>>Spa</option>
-                <option value="laser"  <%= category === 'laser'  ? 'selected' : '' %>>Laser</option>
-                <option value="other"  <%= category === 'other'  ? 'selected' : '' %>>Other</option>
+                <option value="all"    <%= category === 'all'    ? 'selected' : '' %> data-i18n="shops_all_cats">All Categories</option>
+                <option value="barber" <%= category === 'barber' ? 'selected' : '' %> data-i18n="shops_barber">Barber</option>
+                <option value="beauty" <%= category === 'beauty' ? 'selected' : '' %> data-i18n="shops_beauty">Beauty Salon</option>
+                <option value="spa"    <%= category === 'spa'    ? 'selected' : '' %> data-i18n="shops_spa">Spa</option>
+                <option value="laser"  <%= category === 'laser'  ? 'selected' : '' %> data-i18n="shops_laser">Laser</option>
+                <option value="other"  <%= category === 'other'  ? 'selected' : '' %> data-i18n="shops_other">Other</option>
             </select>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn-gold w-100 py-2">Search</button>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn-gold flex-grow-1 py-2" data-i18n="shops_search_btn">Search</button>
+            <button type="button" class="btn btn-outline-secondary" id="toggle-map-btn" title="Toggle map view">
+                <i class="bi bi-map"></i>
+            </button>
         </div>
     </form>
+
+    <!-- Map View (hidden by default) -->
+    <div id="map-container" class="mb-5" style="display:none;">
+        <div id="shops-map" class="rounded-4" style="height:600px;border:1px solid var(--border);"></div>
+        <p class="text-muted small mt-2 text-center">Click shop markers to see details</p>
+    </div>
 
     <!-- Results -->
     <% if (shops.length === 0) { %>
         <div class="text-center py-5">
             <i class="bi bi-shop-window display-4 text-muted mb-3 d-block"></i>
-            <h5 class="text-muted">No shops found</h5>
-            <p class="text-muted small">Try a different category or search term.</p>
+            <h5 class="text-muted" data-i18n="shops_not_found">No shops found</h5>
+            <p class="text-muted small" data-i18n="shops_not_found_desc">Try a different category or search term.</p>
         </div>
     <% } else { %>
         <div class="row g-4">
@@ -65,10 +76,10 @@
 
                             <div class="d-flex gap-3 text-muted small mb-3">
                                 <% if (shop.address) { %><span><i class="bi bi-geo-alt me-1"></i><%= shop.address.substring(0,25) %>...</span><% } %>
-                                <span><i class="bi bi-grid me-1"></i><%= shop.service_count %> services</span>
+                                <span><i class="bi bi-grid me-1"></i><%= shop.service_count %> <span data-i18n="shops_services">services</span></span>
                             </div>
 
-                            <a href="/client/shops/<%= shop.id %>" class="btn-gold w-100 py-2 text-center d-block">
+                            <a href="/client/shops/<%= shop.id %>" class="btn-gold w-100 py-2 text-center d-block" data-i18n="shops_view">
                                 View Shop
                             </a>
                         </div>
@@ -78,5 +89,77 @@
         </div>
     <% } %>
 </div>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggle-map-btn');
+    const mapContainer = document.getElementById('map-container');
+    const listView = document.querySelector('.row.g-4');
+    let mapInitialized = false;
+    let map = null;
+
+    const shopsData = [
+        <% shops.forEach((shop, idx) => { %>
+            <% if (shop.latitude && shop.longitude) { %>
+                {
+                    id: <%= shop.id %>,
+                    name: '<%- shop.name %>',
+                    address: '<%- shop.address %>',
+                    lat: <%= shop.latitude %>,
+                    lng: <%= shop.longitude %>,
+                    category: '<%= shop.category %>'
+                },
+            <% } %>
+        <% }); %>
+    ];
+
+    toggleBtn.addEventListener('click', function() {
+        mapContainer.style.display = mapContainer.style.display === 'none' ? 'block' : 'none';
+        listView.style.display = listView.style.display === 'none' ? 'block' : 'none';
+
+        if (mapContainer.style.display !== 'none' && !mapInitialized) {
+            initializeMap();
+            mapInitialized = true;
+        } else if (map) {
+            map.invalidateSize();
+        }
+    });
+
+    function initializeMap() {
+        const centerLat = shopsData.length > 0 ? shopsData[0].lat : 40.7128;
+        const centerLng = shopsData.length > 0 ? shopsData[0].lng : -74.0060;
+
+        map = L.map('shops-map').setView([centerLat, centerLng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        shopsData.forEach(shop => {
+            const marker = L.circleMarker([shop.lat, shop.lng], {
+                radius: 8,
+                fillColor: '#C9A96E',
+                color: '#A8894E',
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <div style="font-weight:bold;margin-bottom:4px;">${shop.name}</div>
+                <div style="font-size:0.85rem;color:#666;">${shop.address}</div>
+                <div style="font-size:0.75rem;margin-top:6px;">
+                    <a href="/client/shops/${shop.id}" style="color:#C9A96E;text-decoration:none;">View Shop →</a>
+                </div>
+            `);
+        });
+    }
+});
+</script>
 
 <%- include('../partials/footer') %>

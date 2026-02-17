@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS shops (
     address       VARCHAR(255),
     phone         VARCHAR(20),
     cover_image   VARCHAR(255),
+    latitude      DECIMAL(10,8),
+    longitude     DECIMAL(11,8),
     is_active     TINYINT(1)   NOT NULL DEFAULT 1,
     wallet_balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

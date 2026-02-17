@@ -29,6 +29,34 @@
         </div>
     </div>
 
+    <!-- Location Map -->
+    <% if (shop.latitude && shop.longitude) { %>
+        <div class="row g-4 mb-5">
+            <div class="col-12">
+                <h4 class="fw-bold mb-3">Location</h4>
+                <div id="shop-map" class="rounded-4" style="height:400px;"></div>
+            </div>
+        </div>
+
+        <!-- Leaflet CSS & JS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const map = L.map('shop-map').setView([<%= shop.latitude %>, <%= shop.longitude %>], 15);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                const marker = L.marker([<%= shop.latitude %>, <%= shop.longitude %>]).addTo(map);
+                marker.bindPopup('<strong><%= shop.name %></strong><br><%= shop.address %>');
+                marker.openPopup();
+            });
+        </script>
+    <% } %>
+
     <!-- Services -->
     <h4 class="fw-bold mb-4">Services Offered (<%= services.length %>)</h4>
 

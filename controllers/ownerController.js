@@ -63,22 +63,22 @@ exports.getShopSetup = async (req, res) => {
 // POST /owner/shop/setup
 exports.postShopSetup = async (req, res) => {
     const ownerId = req.session.user.id;
-    const { name, description, category, address, phone } = req.body;
+    const { name, description, category, address, phone, latitude, longitude } = req.body;
     const coverFile = req.file ? req.file.filename : null;
 
     try {
         const [[existing]] = await db.query('SELECT id FROM shops WHERE owner_id = ?', [ownerId]);
         if (existing) {
-            const updateFields = [name, description, category, address, phone];
-            let sql = 'UPDATE shops SET name=?, description=?, category=?, address=?, phone=?';
+            const updateFields = [name, description, category, address, phone, latitude || null, longitude || null];
+            let sql = 'UPDATE shops SET name=?, description=?, category=?, address=?, phone=?, latitude=?, longitude=?';
             if (coverFile) { sql += ', cover_image=?'; updateFields.push(coverFile); }
             sql += ' WHERE owner_id=?';
             updateFields.push(ownerId);
             await db.query(sql, updateFields);
         } else {
             await db.query(
-                'INSERT INTO shops (owner_id, name, description, category, address, phone, cover_image) VALUES (?,?,?,?,?,?,?)',
-                [ownerId, name, description, category, address, phone, coverFile]
+                'INSERT INTO shops (owner_id, name, description, category, address, phone, cover_image, latitude, longitude) VALUES (?,?,?,?,?,?,?,?,?)',
+                [ownerId, name, description, category, address, phone, coverFile, latitude || null, longitude || null]
             );
         }
         req.flash('success', 'Shop profile saved.');
