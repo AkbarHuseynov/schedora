@@ -99,20 +99,26 @@ exports.postShopSetup = async (req, res) => {
             shopId = result.insertId;
         }
 
-        // Update or create shop settings
-        await db.query(
-            `INSERT INTO shop_settings (shop_id, location_mode, map_visible, show_distance)
-             VALUES (?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE location_mode=?, map_visible=?, show_distance=?`,
-            [shopId, location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0,
-             location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0]
-        );
+        // Update or create shop settings (with error handling)
+        try {
+            await db.query(
+                `INSERT INTO shop_settings (shop_id, location_mode, map_visible, show_distance)
+                 VALUES (?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE location_mode=?, map_visible=?, show_distance=?`,
+                [shopId, location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0,
+                 location_mode || 'manual', map_visible ? 1 : 0, show_distance ? 1 : 0]
+            );
+        } catch (settingsErr) {
+            console.error('Settings save error:', settingsErr);
+            // Don't fail the whole operation if settings save fails
+            // Settings will be created on next visit or through migration
+        }
 
         req.flash('success', 'Shop profile saved.');
         res.redirect('/owner/dashboard');
     } catch (err) {
-        console.error(err);
-        req.flash('error', 'Could not save shop.');
+        console.error('Shop save error:', err);
+        req.flash('error', 'Could not save shop. Error: ' + err.message);
         res.redirect('/owner/shop/setup');
     }
 };
