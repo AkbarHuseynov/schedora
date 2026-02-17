@@ -1,87 +1,191 @@
-# Map Feature Implementation
+# Map Feature & Shop Settings Implementation
 
 ## Overview
-Added interactive maps to display shop locations so clients can see where shops are situated.
+Complete implementation of interactive maps with owner-controlled visibility settings. Clients see shop locations on maps while owners control exactly what information is displayed.
 
-## Changes Made
+## Database Changes
 
-### 1. Database Schema (`database/schema.sql`)
-- Added `latitude` (DECIMAL(10,8)) column to shops table
-- Added `longitude` (DECIMAL(11,8)) column to shops table
+### 1. Schema Updates (`database/schema.sql`)
+- **shops table**:
+  - Added `latitude` (DECIMAL(10,8)) - Shop's latitude coordinate
+  - Added `longitude` (DECIMAL(11,8)) - Shop's longitude coordinate
+  - Added `updated_at` timestamp - Track profile updates
+
+- **shop_settings table (NEW)**:
+  - `location_mode` - How location is determined (manual/auto)
+  - `map_visible` - Whether to show shop on map (boolean)
+  - `show_distance` - Display distance from client (boolean)
+  - Foreign key to shops with CASCADE delete
 
 ### 2. Migration Script (`database/add-coordinates.sql`)
-- SQL script to add coordinates to existing shops table
-- Includes sample coordinates for shops 1-5 (NYC area)
-- Run this after schema update: `mysql -u root -p schedora < database/add-coordinates.sql`
+Comprehensive migration that:
+- Adds coordinate columns to existing shops
+- Creates shop_settings table
+- Inserts default settings for all existing shops
+- Populates sample coordinates for testing (NYC area)
+- Handles databases in any state (new or existing)
 
-### 3. Shop Detail Page (`views/client/shop-detail.ejs`)
-- Added interactive map display showing shop location
-- Uses Leaflet.js (open-source, requires no API key)
-- Map displays when `latitude` and `longitude` are available
-- Shows shop marker with popup containing name and address
-- Centered on shop location with zoom level 15
+Run after first deployment:
+```bash
+mysql -u root -p schedora < database/add-coordinates.sql
+```
 
-### 4. Shop Listing Page (`views/client/shops.ejs`)
-- Added "Map View" toggle button next to search
-- Displays all shops with coordinates on interactive map
-- Features:
-  - Golden circle markers for each shop
-  - Click markers to see shop details with link to view shop
-  - View toggles between list and map mode
-  - Map centers on first shop's location
-  - Auto-rescales when toggled to visible
+## Application Layer
 
-### 5. Shop Setup Form (`views/owner/shop-setup.ejs`)
-- Added Latitude and Longitude input fields
-- Optional fields for shop owners to enter coordinates
-- Help text explaining how to get coordinates from Google Maps
-- Fields support decimal precision for accurate locations
+### Controllers Updates
 
-### 6. Owner Controller (`controllers/ownerController.js`)
-- Updated `postShopSetup` to handle latitude/longitude fields
-- Saves coordinates when creating or updating shop profile
-- NULL values allowed for shops without coordinates
+**`ownerController.js`**
+- `getShopSetup`: Fetches both shop AND settings data
+- `postShopSetup`: Saves both shop profile and settings
+- Uses INSERT...ON DUPLICATE KEY UPDATE for settings
+- Handles new shop creation with default settings
 
-## Frontend Dependencies
-- **Leaflet.js** v1.9.4 - CDN loaded from cdnjs.cloudflare.com
-- **OpenStreetMap** - Free tile layer (no API key needed)
+**`clientController.js`**
+- `getShops`: Joins shop_settings, filters by map_visible
+- `getShopDetail`: Fetches settings and passes to template
+- Shop detail respects map_visible and show_distance settings
+- All queries optimized to minimize DB hits
 
-## How to Use
+### Views Updates
 
-### For Shop Owners
-1. Go to Shop Setup (Owner Dashboard)
-2. Scroll to "Location Coordinates" section
-3. Get coordinates from Google Maps:
-   - Go to Google Maps
+**`views/owner/shop-setup.ejs`**
+Comprehensive settings section includes:
+- Location Coordinates (manual entry)
+  - Latitude and Longitude inputs with guide
+  - Help text on getting coordinates from Google Maps
+- Location Detection Mode
+  - Manual: Owner provides exact coordinates
+  - Auto: Future support for browser geolocation
+- Map Visibility Checkbox
+  - Controls whether shop appears on map
+- Distance Display Checkbox
+  - Shows approximate distance from client when enabled
+  - Only works if shop has coordinates
+
+**`views/client/shop-detail.ejs`**
+Enhanced map display:
+- Only shows map if `map_visible = true` and coords exist
+- Optional distance calculation using Leaflet geolocation
+- Requests browser location permission (user decides)
+- Shows "X km away" when enabled
+- Gracefully hides if owner disabled visibility
+
+**`views/client/shops.ejs`**
+Updated map listing:
+- Filters shops by `map_visible` setting
+- Only shows shops that owner has enabled for map view
+- Respects owner's privacy/visibility preferences
+
+## Features
+
+✅ **Owner Controls**
+- Set exact shop coordinates
+- Toggle map visibility on/off
+- Control distance display to clients
+- Choose location determination method
+
+✅ **Client Experience**
+- See shops on interactive map
+- Toggle list/map view
+- Click markers for quick shop info
+- Optional distance calculation
+- Smooth zoom and pan
+
+✅ **Privacy & Flexibility**
+- Shops can hide location completely
+- Distance display is optional
+- No forced data collection
+- Owner has full control
+
+✅ **Technical**
+- Leaflet.js (open-source, no API keys)
+- OpenStreetMap (free tile layer)
+- Responsive design (mobile & desktop)
+- Browser geolocation (permission-based)
+- Efficient database queries
+
+## Setup Instructions
+
+### Initial Setup
+1. Ensure database has schema updates:
+```bash
+mysql -u root -p schedora < database/add-coordinates.sql
+```
+
+2. Start server (auto-creates new tables):
+```bash
+npm start
+```
+
+### As Shop Owner
+1. Log in and go to "Shop Setup"
+2. Scroll to "Location & Map Settings"
+3. Enter coordinates from Google Maps:
+   - Open Google Maps
    - Right-click on shop location
-   - Click coordinates to copy (latitude, longitude)
-4. Paste latitude and longitude in the fields
-5. Save Shop Changes
+   - Copy coordinates (format: 40.7128, -74.0060)
+4. Choose location mode (currently only manual supported)
+5. Check "Show map to clients" to enable map display
+6. Check "Show distance" to enable distance calculation
+7. Save Changes
 
-### For Clients
-1. **Shop Detail Page**: View interactive map showing exact shop location
-2. **Shop Listing Page**:
-   - Click map icon to toggle between list and map view
-   - See all shops with coordinates as markers
-   - Click markers to view shop details
-   - Click "View Shop" link in popup to go to shop detail page
-
-## Testing
-1. Update database: `mysql -u root -p schedora < database/add-coordinates.sql`
-2. Start server: `npm start`
-3. As owner: Add/update coordinates in shop setup
-4. As client: Browse shops and toggle map view
+### As Client
+1. Go to "Browse Shops"
+2. Click map icon to toggle between list and map views
+3. See all shops with enabled maps
+4. Click markers to see shop details
+5. View shop detail page for full map and info
 
 ## Technical Details
-- Maps use Leaflet Circle Markers (gold color: #C9A96E)
-- Maps automatically resize when toggled between views
-- Popups show shop name, address, and quick link
-- Responsive design works on mobile and desktop
-- No external API keys required
+
+### Database Schema
+```sql
+-- Coordinates in shops table
+latitude DECIMAL(10,8)      -- Range: -90 to +90
+longitude DECIMAL(11,8)     -- Range: -180 to +180
+
+-- Settings table for configuration
+shop_settings (
+  location_mode: enum('manual','auto'),
+  map_visible: boolean,
+  show_distance: boolean
+)
+```
+
+### JavaScript Implementation
+- Leaflet.js 1.9.4 (CDN)
+- OpenStreetMap tile layer (free)
+- Geolocation API (optional, user permission)
+- Circle markers with gold styling (#C9A96E)
+- Automatic map resize on toggle
+
+### Performance
+- Shop_settings table uses shop_id as unique key
+- Efficient LEFT JOINs in queries
+- Minimal JavaScript (only loaded when needed)
+- No external API calls required
+- CDN-based libraries
+
+## Coordinate Format
+
+Use decimal degrees (standard GPS format):
+- **Latitude**: -90 (South Pole) to +90 (North Pole)
+- **Longitude**: -180 (West) to +180 (East)
+
+Examples:
+- New York: 40.7128, -74.0060
+- London: 51.5074, -0.1278
+- Tokyo: 35.6762, 139.6503
+- Sydney: -33.8688, 151.2093
 
 ## Future Enhancements
-- Geolocation API to show "distance from user"
-- Geocoding API to auto-populate coordinates from address
-- Multiple location clustering for shops with many locations
-- Route planning to shop location
-- Working hours overlay on maps
+
+- Auto-complete address to coordinates (Google Places API)
+- Store multiple locations per shop
+- Operating hours overlay
+- Street view integration
+- Route planning to shop
+- Clustering for multiple locations
+- Heatmap of popular areas
+- Check-in/visit history
+- Owner location analytics
