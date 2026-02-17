@@ -26,62 +26,17 @@
                 <% if (shop.phone)   { %><span><i class="bi bi-telephone me-1"></i><%= shop.phone %></span><% } %>
                 <span><i class="bi bi-person me-1"></i>Owner: <%= shop.owner_name %></span>
             </div>
+
+            <!-- Show Location Button (if shop has coordinates and map is visible) -->
+            <% if (shop.latitude && shop.longitude && settings && settings.map_visible) { %>
+                <button type="button" class="btn btn-lg btn-outline-gold mt-4 w-100" data-bs-toggle="modal" data-bs-target="#shopMapModal">
+                    <i class="bi bi-map me-2"></i>View on Map
+                </button>
+            <% } %>
         </div>
     </div>
 
-    <!-- Location Map (respects map_visible setting) -->
-    <% if (shop.latitude && shop.longitude && settings && settings.map_visible) { %>
-        <div class="row g-4 mb-5">
-            <div class="col-12">
-                <h4 class="fw-bold mb-3">
-                    <i class="bi bi-geo-alt me-2"></i>Location
-                </h4>
-                <div id="shop-map" class="rounded-4" style="height:400px;border:1px solid var(--border);"></div>
-                <p class="text-muted small mt-2">
-                    <% if (settings && settings.location_mode === 'auto') { %>
-                        <i class="bi bi-info-circle me-1"></i>Distance will be shown once we know your location
-                    <% } %>
-                </p>
-            </div>
-        </div>
 
-        <!-- Leaflet CSS & JS -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const map = L.map('shop-map').setView([<%= shop.latitude %>, <%= shop.longitude %>], 15);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
-
-                const marker = L.marker([<%= shop.latitude %>, <%= shop.longitude %>]).addTo(map);
-                marker.bindPopup('<strong><%= shop.name %></strong><br><%= shop.address %>');
-                marker.openPopup();
-
-                // Show distance if enabled and user allows location
-                <% if (settings && settings.show_distance) { %>
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function(position) {
-                            const userLat = position.coords.latitude;
-                            const userLng = position.coords.longitude;
-                            const distance = Math.round(
-                                L.latLng(userLat, userLng).distanceTo(
-                                    L.latLng(<%= shop.latitude %>, <%= shop.longitude %>)
-                                ) / 1000 * 10
-                            ) / 10;
-                            const distanceEl = document.querySelector('#shop-map').parentElement.querySelector('.text-muted');
-                            if (distanceEl) {
-                                distanceEl.innerHTML += '<br><strong>' + distance + ' km away</strong>';
-                            }
-                        });
-                    }
-                <% } %>
-            });
-        </script>
-    <% } %>
 
     <!-- Services -->
     <h4 class="fw-bold mb-4">Services Offered (<%= services.length %>)</h4>
@@ -150,6 +105,90 @@
     <div class="mt-4">
         <a href="/client/shops" class="text-muted small"><i class="bi bi-arrow-left me-1"></i>Back to all shops</a>
     </div>
+
+    <!-- Map Modal (respects map_visible setting) -->
+    <% if (shop.latitude && shop.longitude && settings && settings.map_visible) { %>
+        <!-- Leaflet CSS (loaded once) -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+        <!-- Map Modal -->
+        <div class="modal fade" id="shopMapModal" tabindex="-1" aria-labelledby="shopMapLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="shopMapLabel">
+                            <i class="bi bi-map me-2"></i><%= shop.name %>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div id="shop-map-modal" style="height: 500px; border-radius: 0.5rem;"></div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <p class="text-muted small mb-0 w-100">
+                            <i class="bi bi-geo-alt me-1"></i><strong><%= shop.address %></strong>
+                            <% if (settings && settings.show_distance) { %>
+                                <br><span id="distance-info" class="d-none"><i class="bi bi-ruler me-1"></i><span id="distance-value"></span> away</span>
+                            <% } %>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Initialization Script -->
+        <script>
+            let shopMap = null;
+
+            document.getElementById('shopMapModal').addEventListener('show.bs.modal', function() {
+                // Only initialize map when modal is shown
+                if (shopMap) return;
+
+                setTimeout(() => {
+                    shopMap = L.map('shop-map-modal').setView([<%= shop.latitude %>, <%= shop.longitude %>], 15);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors',
+                        maxZoom: 19
+                    }).addTo(shopMap);
+
+                    const marker = L.marker([<%= shop.latitude %>, <%= shop.longitude %>]).addTo(shopMap);
+                    marker.bindPopup('<strong><%= shop.name %></strong><br><%= shop.address %>');
+                    marker.openPopup();
+
+                    // Show distance if enabled
+                    <% if (settings && settings.show_distance) { %>
+                        if (navigator.geolocation) {
+                            navigator.geolocation.getCurrentPosition(function(position) {
+                                const userLat = position.coords.latitude;
+                                const userLng = position.coords.longitude;
+                                const distance = Math.round(
+                                    L.latLng(userLat, userLng).distanceTo(
+                                        L.latLng(<%= shop.latitude %>, <%= shop.longitude %>)
+                                    ) / 1000 * 10
+                                ) / 10;
+                                const distanceEl = document.getElementById('distance-value');
+                                if (distanceEl) {
+                                    distanceEl.textContent = distance + ' km';
+                                    document.getElementById('distance-info').classList.remove('d-none');
+                                }
+                            });
+                        }
+                    <% } %>
+                }, 300);
+            });
+
+            // Clean up map when modal is hidden
+            document.getElementById('shopMapModal').addEventListener('hidden.bs.modal', function() {
+                if (shopMap) {
+                    shopMap.off();
+                    shopMap.remove();
+                    shopMap = null;
+                }
+            });
+        </script>
+    <% } %>
 </div>
 
 <%- include('../partials/footer') %>
