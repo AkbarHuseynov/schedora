@@ -54,8 +54,9 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
                             <label class="form-label" data-i18n="owner_shop_address">Address</label>
-                            <input type="text" name="address" class="form-control"
+                            <input type="text" name="address" id="address-input" class="form-control"
                                    value="<%= shop ? shop.address : '' %>" placeholder="123 Main St, City">
+                            <small class="text-muted d-block mt-1">💡 Auto-filled when you select location on map</small>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label" data-i18n="owner_shop_phone">Phone</label>
@@ -154,24 +155,33 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="location-picker-map" style="height: 500px; border-radius: 8px; margin-bottom: 15px;"></div>
-                <div class="alert alert-info mb-0">
-                    <small><i class="bi bi-info-circle me-2"></i>Click on the map to select your shop's location. The marker will appear where you click.</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="flex-grow-1">
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <label class="form-label small d-block">Latitude:</label>
-                            <span id="selected-lat" class="badge bg-secondary">Not selected</span>
+                <!-- Search by Location Name with Autocomplete -->
+                <div class="mb-3">
+                    <label class="form-label small">Search by location name:</label>
+                    <div class="position-relative">
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" id="location-search-input"
+                                   placeholder="e.g., Flame Towers, Old City, Baku Park...">
+                            <button class="btn btn-outline-secondary" type="button" id="location-search-btn">
+                                <i class="bi bi-search"></i> Search
+                            </button>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small d-block">Longitude:</label>
-                            <span id="selected-lng" class="badge bg-secondary">Not selected</span>
+                        <!-- Autocomplete Suggestions Dropdown -->
+                        <div id="search-suggestions" class="position-absolute w-100 bg-white border border-top-0 rounded-bottom shadow-sm" style="display: none; max-height: 200px; overflow-y: auto; z-index: 1000;">
+                            <div id="suggestions-list"></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Map -->
+                <div id="location-picker-map" style="height: 400px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;"></div>
+
+                <!-- Info Alert -->
+                <div class="alert alert-info mb-0">
+                    <small><i class="bi bi-info-circle me-2"></i>Click on the map to select your shop's location, or search by name above.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-gold" id="confirm-location-btn">Confirm Location</button>
             </div>
@@ -194,8 +204,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const openMapBtn = document.getElementById('open-map-picker-btn');
     const modal = new bootstrap.Modal(document.getElementById('locationPickerModal'));
     const confirmBtn = document.getElementById('confirm-location-btn');
-    const selectedLatBadge = document.getElementById('selected-lat');
-    const selectedLngBadge = document.getElementById('selected-lng');
 
     openMapBtn.addEventListener('click', function() {
         modal.show();
@@ -203,14 +211,245 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(initializeLocationPicker, 500);
     });
 
+    // Search by location name with autocomplete
+    const searchBtn = document.getElementById('location-search-btn');
+    const searchInput = document.getElementById('location-search-input');
+    const suggestionsDiv = document.getElementById('search-suggestions');
+    const suggestionsList = document.getElementById('suggestions-list');
+    let searchTimeout;
+    let selectedSuggestionIndex = -1;
+
+    searchBtn.addEventListener('click', function() {
+        searchLocation();
+    });
+
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            // If a suggestion is selected, use it
+            if (selectedSuggestionIndex >= 0) {
+                const suggestions = suggestionsList.querySelectorAll('.suggestion-item');
+                if (suggestions[selectedSuggestionIndex]) {
+                    suggestions[selectedSuggestionIndex].click();
+                    return;
+                }
+            }
+            searchLocation();
+        }
+    });
+
+    // Real-time autocomplete as user types
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+
+        if (query.length < 2) {
+            suggestionsDiv.style.display = 'none';
+            selectedSuggestionIndex = -1;
+            return;
+        }
+
+        // Show loading state
+        suggestionsList.innerHTML = '<div class="p-2 text-muted small"><i class="bi bi-hourglass-split"></i> Finding suggestions...</div>';
+        suggestionsDiv.style.display = 'block';
+
+        // Debounce the search (wait 300ms after user stops typing)
+        searchTimeout = setTimeout(() => {
+            fetchAutocompleteSuggestions(query);
+        }, 300);
+    });
+
+    // Keyboard navigation in suggestions
+    searchInput.addEventListener('keydown', function(e) {
+        const suggestions = suggestionsList.querySelectorAll('.suggestion-item');
+        const totalSuggestions = suggestions.length;
+
+        if (totalSuggestions === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedSuggestionIndex = (selectedSuggestionIndex + 1) % totalSuggestions;
+            updateSuggestionHighlight(suggestions);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedSuggestionIndex = selectedSuggestionIndex <= 0 ? totalSuggestions - 1 : selectedSuggestionIndex - 1;
+            updateSuggestionHighlight(suggestions);
+        } else if (e.key === 'Escape') {
+            suggestionsDiv.style.display = 'none';
+            selectedSuggestionIndex = -1;
+        }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#location-search-input') && !e.target.closest('#search-suggestions')) {
+            suggestionsDiv.style.display = 'none';
+            selectedSuggestionIndex = -1;
+        }
+    });
+
+    function updateSuggestionHighlight(suggestions) {
+        suggestions.forEach((item, idx) => {
+            if (idx === selectedSuggestionIndex) {
+                item.classList.add('bg-light');
+                item.style.backgroundColor = '#f8f9fa';
+            } else {
+                item.classList.remove('bg-light');
+                item.style.backgroundColor = '';
+            }
+        });
+    }
+
+    function fetchAutocompleteSuggestions(query) {
+        // Use Nominatim API with viewbox for Baku area
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=48.5,39.5,50.5,41&bounded=1&limit=5`;
+
+        fetch(nominatimUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    displaySuggestions(data);
+                } else {
+                    suggestionsList.innerHTML = '<div class="p-2 text-muted small">No suggestions found</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Autocomplete error:', error);
+                suggestionsList.innerHTML = '<div class="p-2 text-danger small">Error loading suggestions</div>';
+            });
+    }
+
+    function displaySuggestions(results) {
+        suggestionsList.innerHTML = '';
+        selectedSuggestionIndex = -1;
+
+        results.forEach((result, idx) => {
+            const name = result.display_name.split(',')[0]; // Get first part (main place name)
+            const address = result.display_name.substring(0, 60); // Truncate long addresses
+
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item p-2 border-bottom cursor-pointer';
+            suggestionItem.style.cursor = 'pointer';
+            suggestionItem.innerHTML = `
+                <div class="small">
+                    <strong>${name}</strong>
+                    <br>
+                    <span class="text-muted" style="font-size: 0.85rem;">${address}${address.length > 59 ? '...' : ''}</span>
+                </div>
+            `;
+
+            suggestionItem.addEventListener('click', function() {
+                selectSuggestion(result);
+            });
+
+            suggestionItem.addEventListener('mouseover', function() {
+                selectedSuggestionIndex = idx;
+                const items = suggestionsList.querySelectorAll('.suggestion-item');
+                updateSuggestionHighlight(items);
+            });
+
+            suggestionsList.appendChild(suggestionItem);
+        });
+    }
+
+    function selectSuggestion(result) {
+        const lat = parseFloat(result.lat);
+        const lng = parseFloat(result.lon);
+        const displayName = result.display_name;
+
+        // Update search input with selected location
+        searchInput.value = displayName.split(',')[0];
+        suggestionsDiv.style.display = 'none';
+        selectedSuggestionIndex = -1;
+
+        // Automatically zoom to location
+        if (!locationPickerMap) {
+            // Map not initialized yet, initialize and zoom to result
+            setTimeout(() => {
+                selectedLat = lat;
+                selectedLng = lng;
+                addMarker(lat, lng);
+                if (locationPickerMap) {
+                    locationPickerMap.setView([lat, lng], 15);
+                }
+                updateBadges();
+            }, 500);
+        } else {
+            // Map already initialized, just zoom to result
+            selectedLat = lat;
+            selectedLng = lng;
+            addMarker(lat, lng);
+            locationPickerMap.setView([lat, lng], 15);
+            updateBadges();
+        }
+    }
+
+    function searchLocation() {
+        const query = searchInput.value.trim();
+        if (!query) {
+            alert('Please enter a location name');
+            return;
+        }
+
+        // Show loading state
+        searchBtn.disabled = true;
+        searchBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Searching...';
+
+        // Use OpenStreetMap's Nominatim geocoding API
+        // Focus on Baku area by adding bias
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=48.5,39.5,50.5,41&bounded=1&limit=1`;
+
+        fetch(nominatimUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+
+                    // Ensure map is initialized
+                    if (!locationPickerMap) {
+                        setTimeout(() => {
+                            selectedLat = lat;
+                            selectedLng = lng;
+                            addMarker(lat, lng);
+                            locationPickerMap.setView([lat, lng], 15);
+                            updateBadges();
+                        }, 500);
+                    } else {
+                        selectedLat = lat;
+                        selectedLng = lng;
+                        addMarker(lat, lng);
+                        locationPickerMap.setView([lat, lng], 15);
+                        updateBadges();
+                    }
+
+                    // Clear search input
+                    searchInput.value = '';
+                } else {
+                    alert('Location not found. Please try a different search term.');
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                alert('Error searching location. Please try again.');
+            })
+            .finally(() => {
+                // Restore button state
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = '<i class="bi bi-search"></i> Search';
+            });
+    }
+
     function initializeLocationPicker() {
         if (locationPickerMap) return; // Already initialized
 
-        // Get current coordinates or use default
-        const currentLat = parseFloat(latInput.value) || 40.7128;
-        const currentLng = parseFloat(lngInput.value) || -74.0060;
+        // Get current coordinates or use Baku as default
+        const currentLat = parseFloat(latInput.value) || 40.3856;  // Baku latitude
+        const currentLng = parseFloat(lngInput.value) || 49.8671;  // Baku longitude
 
-        locationPickerMap = L.map('location-picker-map').setView([currentLat, currentLng], 14);
+        locationPickerMap = L.map('location-picker-map').setView([currentLat, currentLng], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
@@ -247,28 +486,83 @@ document.addEventListener('DOMContentLoaded', function() {
             fillOpacity: 0.9
         }).addTo(locationPickerMap);
 
-        // Add popup
+        // Add popup with address or coordinates
+        const addressInput = document.getElementById('address-input');
+        const addressText = addressInput && addressInput.value ?
+            addressInput.value : `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
         selectedMarker.bindPopup(`
-            <div class="text-center">
-                <strong>Selected Location</strong><br>
-                <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small>
+            <div class="text-center" style="max-width: 200px;">
+                <strong>📍 Selected Location</strong><br>
+                <small style="word-break: break-word;">${addressText}</small>
             </div>
         `).openPopup();
 
         // Center map on marker
         locationPickerMap.setView([lat, lng], locationPickerMap.getZoom());
+
+        // Reverse geocode to get address automatically
+        reverseGeocodeAddress(lat, lng);
+    }
+
+    function reverseGeocodeAddress(lat, lng) {
+        // Use Nominatim reverse geocoding to get address from coordinates
+        const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+        fetch(nominatimUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.address) {
+                    // Build address from components
+                    const addressParts = [];
+
+                    // Add road/street name
+                    if (data.address.road) {
+                        addressParts.push(data.address.road);
+                    }
+
+                    // Add house number if available
+                    if (data.address.house_number) {
+                        addressParts[0] = (data.address.house_number + ' ' + (addressParts[0] || ''));
+                    }
+
+                    // Add suburb/neighborhood
+                    if (data.address.suburb) {
+                        addressParts.push(data.address.suburb);
+                    } else if (data.address.neighbourhood) {
+                        addressParts.push(data.address.neighbourhood);
+                    }
+
+                    // Add city
+                    if (data.address.city) {
+                        addressParts.push(data.address.city);
+                    } else if (data.address.town) {
+                        addressParts.push(data.address.town);
+                    } else if (data.address.village) {
+                        addressParts.push(data.address.village);
+                    }
+
+                    // Add country
+                    if (data.address.country) {
+                        addressParts.push(data.address.country);
+                    }
+
+                    // Create full address and update form
+                    const fullAddress = addressParts.filter(Boolean).join(', ');
+                    if (fullAddress) {
+                        document.getElementById('address-input').value = fullAddress;
+                    }
+                }
+            })
+            .catch(error => {
+                console.warn('Could not fetch address:', error);
+                // Not critical - address can be entered manually
+            });
     }
 
     function updateBadges() {
-        if (selectedLat !== null && selectedLng !== null) {
-            selectedLatBadge.textContent = selectedLat.toFixed(6);
-            selectedLatBadge.classList.remove('bg-secondary');
-            selectedLatBadge.classList.add('bg-success');
-
-            selectedLngBadge.textContent = selectedLng.toFixed(6);
-            selectedLngBadge.classList.remove('bg-secondary');
-            selectedLngBadge.classList.add('bg-success');
-        }
+        // Badge display removed - coordinates are shown in marker popup instead
+        // This function is kept for compatibility with existing code
     }
 
     confirmBtn.addEventListener('click', function() {
